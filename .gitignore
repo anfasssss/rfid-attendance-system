@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Local Environment Secrets
+backend/.env
+.env
+.env.local
+.env.production
+.env.development
+
+# Build Outputs
+frontend/dist/
+dist/
+
+# WhatsApp Web Session Cache
+backend/.wwebjs_auth/
+backend/.wwebjs_cache/
+
+# System / IDE Files
+.DS_Store
+.vscode/
+.idea/
+.gemini/
