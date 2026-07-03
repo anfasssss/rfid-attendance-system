@@ -6,11 +6,10 @@ let db;
 let isMock = false;
 const mockDbPath = path.join(__dirname, 'mock_db.json');
 
-// Helper to initialize a mock database with default seed data
+// Helper to initialize the local JSON database with default seed data
 function initializeMockDb() {
   isMock = true;
-  console.log('⚠️  [Firebase Service] firebase-admin credentials not found or incomplete.');
-  console.log('🚀  [Firebase Service] Running in MOCK DATABASE mode (saves to mock_db.json).');
+  console.log('🚀  [Database Service] Running in local JSON database mode (saves to mock_db.json).');
   
   if (!fs.existsSync(mockDbPath)) {
     const seedData = {
@@ -85,34 +84,8 @@ function initializeMockDb() {
   }
 }
 
-// Try to initialize Firebase Admin SDK
-try {
-  const serviceAccountPath = path.join(__dirname, 'serviceAccountKey.json');
-  
-  if (fs.existsSync(serviceAccountPath)) {
-    const serviceAccount = require(serviceAccountPath);
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
-    db = admin.firestore();
-    console.log('🔥  [Firebase Service] Connected to live Cloud Firestore successfully.');
-  } else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
-      })
-    });
-    db = admin.firestore();
-    console.log('🔥  [Firebase Service] Connected to live Cloud Firestore via ENV credentials.');
-  } else {
-    initializeMockDb();
-  }
-} catch (error) {
-  console.error('❌  [Firebase Service] Error trying to initialize Firebase SDK:', error.message);
-  initializeMockDb();
-}
+// Unconditionally initialize local JSON database mode
+initializeMockDb();
 
 // Read local mock DB helper
 function readMockDb() {
