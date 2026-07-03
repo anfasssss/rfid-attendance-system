@@ -242,10 +242,33 @@ const firebaseService = {
     }
   },
 
-  // 7. Log check-in attendance scan
+  // 7. Log check-in/check-out attendance scan
   logAttendance: async (student) => {
     const timestamp = new Date().toISOString();
     const dateStr = timestamp.split('T')[0];
+
+    // Determine log type: entry or exit
+    let type = 'entry';
+    if (isMock) {
+      const data = readMockDb();
+      const studentTodayLogs = data.attendance_logs.filter(l => l.studentId === student.id && l.dateStr === dateStr);
+      studentTodayLogs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      if (studentTodayLogs.length > 0) {
+        const lastLog = studentTodayLogs[studentTodayLogs.length - 1];
+        type = lastLog.type === 'entry' ? 'exit' : 'entry';
+      }
+    } else {
+      const snapshot = await db.collection('attendance_logs')
+        .where('studentId', '==', student.id)
+        .where('dateStr', '==', dateStr)
+        .get();
+      if (!snapshot.empty) {
+        const logs = snapshot.docs.map(doc => doc.data());
+        logs.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        const lastLog = logs[logs.length - 1];
+        type = lastLog.type === 'entry' ? 'exit' : 'entry';
+      }
+    }
 
     const logRecord = {
       studentId: student.id,
@@ -253,7 +276,8 @@ const firebaseService = {
       grade: student.grade,
       rfidUid: student.rfidUid,
       timestamp: timestamp,
-      dateStr: dateStr
+      dateStr: dateStr,
+      type: type
     };
 
     if (isMock) {

@@ -380,6 +380,21 @@ const LiveFeed = ({ userRole }) => {
                           }}>
                             {log.grade}
                           </span>
+                          {log.studentId !== 'unregistered' && (
+                            <span style={{
+                              fontSize: '0.72rem',
+                              fontWeight: 'bold',
+                              color: log.type === 'exit' ? 'rgba(6, 182, 212, 1)' : 'rgba(16, 185, 129, 1)',
+                              background: log.type === 'exit' ? 'rgba(6, 182, 212, 0.08)' : 'rgba(16, 185, 129, 0.08)',
+                              padding: '2px 8px',
+                              borderRadius: '12px',
+                              border: log.type === 'exit' ? '1px solid rgba(6, 182, 212, 0.2)' : '1px solid rgba(16, 185, 129, 0.2)',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.05em'
+                            }}>
+                              {log.type || 'entry'}
+                            </span>
+                          )}
                           <span style={{
                             fontSize: '0.75rem',
                             fontFamily: 'monospace',

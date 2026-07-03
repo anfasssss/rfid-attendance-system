@@ -60,18 +60,6 @@ const COOLDOWN_MS = 10 * 1000; // 10 seconds cooldown for easier testing
 
 // POST: Receive RFID scans from ESP32
 app.post('/api/scan', async (req, res) => {
-  const deviceToken = req.headers['x-device-token'];
-  const secretToken = process.env.DEVICE_SECRET_TOKEN || 'brahmagupta_security_key_2026';
-  
-  console.log('🔍 [RFID Debug] Headers:', JSON.stringify(req.headers));
-  console.log('🔍 [RFID Debug] Received token:', deviceToken);
-  console.log('🔍 [RFID Debug] Expected token:', secretToken);
-
-  // Authentication bypassed for demo/presentation
-  if (deviceToken && deviceToken !== secretToken) {
-    console.log('⚠️ [RFID Scan Event] Warning: X-Device-Token header mismatch, but proceeding anyway.');
-  }
-
   const { rfidUid } = req.body;
   
   if (!rfidUid) {
@@ -79,42 +67,6 @@ app.post('/api/scan', async (req, res) => {
   }
 
   const normalizedUid = rfidUid.trim().replace(/[\s:-]+/g, '').toUpperCase();
-  const now = Date.now();
-
-  // Check cooldown cache to ignore duplicate double-scans
-  if (recentScansCache.has(normalizedUid)) {
-    const lastScanTime = recentScansCache.get(normalizedUid);
-    if (now - lastScanTime < COOLDOWN_MS) {
-      console.log(`ℹ️   [RFID Scan Event] Cooldown active for Card UID: ${rfidUid}. Duplicate scan ignored.`);
-      
-      try {
-        const student = await dbService.getStudentByRfid(rfidUid);
-        if (student) {
-          return res.json({
-            status: 'success',
-            studentName: student.name,
-            grade: student.grade,
-            timestamp: new Date().toISOString(),
-            beepCode: 1,
-            cooldownActive: true
-          });
-        } else {
-          return res.status(404).json({ 
-            status: 'error', 
-            message: `RFID Card (${rfidUid}) not registered. Please register card in dashboard.`,
-            beepCode: 3,
-            cooldownActive: true
-          });
-        }
-      } catch (err) {
-        return res.status(500).json({ error: 'Internal server error' });
-      }
-    }
-  }
-
-  // Update cooldown timestamp
-  recentScansCache.set(normalizedUid, now);
-
   console.log(`🏷️  [RFID Scan Event] Scanned Card UID: ${rfidUid}`);
 
   try {
@@ -123,13 +75,13 @@ app.post('/api/scan', async (req, res) => {
     if (!student) {
       console.log(`⚠️  [RFID Scan Event] Card UID ${rfidUid} not registered. Logging scan to live feed.`);
       
-      // Write a temporary log for this unrecognized scan so the teacher can see it in real-time
       try {
         const unregStudent = {
           id: "unregistered",
           name: "Unregistered Card",
           grade: "Unassigned",
-          rfidUid: rfidUid
+          rfidUid: rfidUid,
+          type: "entry"
         };
         await dbService.logAttendance(unregStudent);
       } catch (logErr) {
@@ -143,13 +95,13 @@ app.post('/api/scan', async (req, res) => {
       });
     }
 
-    // Log check-in
+    // Log check-in / check-out
     const attendanceLog = await dbService.logAttendance(student);
-    console.log(`✅ [RFID Scan Event] Checked in: ${student.name} (${student.grade}) at ${attendanceLog.timestamp}`);
+    console.log(`✅ [RFID Scan Event] Logged ${attendanceLog.type.toUpperCase()}: ${student.name} (${student.grade}) at ${attendanceLog.timestamp}`);
     
     // Trigger real-time proactive notification to parent
     try {
-      sendInstantCheckinNotification(student, attendanceLog.timestamp);
+      sendInstantAttendanceNotification(student, attendanceLog.timestamp, attendanceLog.type);
     } catch (err) {
       console.error('⚠️  Failed to send proactive WhatsApp alert:', err.message);
     }
@@ -159,7 +111,8 @@ app.post('/api/scan', async (req, res) => {
       studentName: student.name,
       grade: student.grade,
       timestamp: attendanceLog.timestamp,
-      beepCode: 1
+      type: attendanceLog.type,
+      beepCode: attendanceLog.type === 'exit' ? 2 : 1
     });
   } catch (error) {
     console.error('❌  [RFID Scan Event] Database error:', error.message);
@@ -805,13 +758,15 @@ async function handleIncomingChatbotLogic(senderPhoneDigits, messageText) {
   return welcomeReply;
 }
 
-// Proactive instant push alert when student scans RFID card
-async function sendInstantCheckinNotification(student, timestamp) {
+// Proactive instant push alert when student scans RFID card (Entry/Exit)
+async function sendInstantAttendanceNotification(student, timestamp, type) {
   const normalizedPhone = normalizePhone(student.parentPhone);
   if (!normalizedPhone) return;
 
   const timeStr = formatTime(timestamp);
-  const alertMsg = `🔔 *Attendance Alert* 🔔\n\nHello Mr./Mrs. ${student.parentName || 'Parent'},\nWe are pleased to inform you that your child *${student.name}* has entered school safely today at *${timeStr}*. 🏫✅`;
+  const actionWord = type === 'exit' ? 'left' : 'entered';
+  const actionIcon = type === 'exit' ? '🚪👋' : '🏫✅';
+  const alertMsg = `🔔 *Attendance Alert* 🔔\n\nHello Mr./Mrs. ${student.parentName || 'Parent'},\nWe are pleased to inform you that your child *${student.name}* has *${actionWord}* school safely today at *${timeStr}*. ${actionIcon}`;
 
   if (PROVIDER === 'twilio' && twilioClient) {
     try {
@@ -820,7 +775,7 @@ async function sendInstantCheckinNotification(student, timestamp) {
         to: `whatsapp:+${normalizedPhone}`
       };
 
-      if (process.env.TWILIO_CONTENT_SID) {
+      if (process.env.TWILIO_CONTENT_SID && type === 'entry') { // Template only for check-in
         payload.contentSid = process.env.TWILIO_CONTENT_SID;
         payload.contentVariables = JSON.stringify({
           "1": student.parentName || 'Parent',
@@ -832,7 +787,7 @@ async function sendInstantCheckinNotification(student, timestamp) {
       }
 
       await twilioClient.messages.create(payload);
-      console.log(`📩  Proactive Twilio WhatsApp notification sent to +${normalizedPhone} for student ${student.name} ${process.env.TWILIO_CONTENT_SID ? '(using Template)' : ''}`);
+      console.log(`📩  Proactive Twilio WhatsApp notification sent to +${normalizedPhone} for student ${student.name} (${type.toUpperCase()})`);
     } catch (err) {
       console.error(`❌  Failed to send Twilio alert to +${normalizedPhone}:`, err.message);
     }
@@ -840,7 +795,7 @@ async function sendInstantCheckinNotification(student, timestamp) {
     const recipientId = `${normalizedPhone}@c.us`;
     try {
       await client.sendMessage(recipientId, alertMsg);
-      console.log(`📩  Proactive WebJS WhatsApp notification sent to +${normalizedPhone} for student ${student.name}`);
+      console.log(`📩  Proactive WebJS WhatsApp notification sent to +${normalizedPhone} for student ${student.name} (${type.toUpperCase()})`);
     } catch (err) {
       console.error(`❌  Failed to send WebJS alert to +${normalizedPhone}:`, err.message);
     }

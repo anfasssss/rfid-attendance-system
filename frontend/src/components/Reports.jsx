@@ -76,7 +76,7 @@ const Reports = ({ userRole, teachers }) => {
 
     // CSV Header
     let csvContent = 'data:text/csv;charset=utf-8,';
-    csvContent += 'Student Name,Grade / Class,RFID Card UID,Arrival Date,Arrival Time\n';
+    csvContent += 'Student Name,Grade / Class,RFID Card UID,Scan Date,Scan Time,Scan Type\n';
 
     // CSV Rows
     filteredLogs.forEach(log => {
@@ -85,8 +85,9 @@ const Reports = ({ userRole, teachers }) => {
       
       const cleanName = `"${log.studentName.replace(/"/g, '""')}"`;
       const cleanGrade = `"${log.grade.replace(/"/g, '""')}"`;
+      const typeStr = log.type || 'entry';
 
-      csvContent += `${cleanName},${cleanGrade},${log.rfidUid},${dateStr},${timeStr}\n`;
+      csvContent += `${cleanName},${cleanGrade},${log.rfidUid},${dateStr},${timeStr},${typeStr}\n`;
     });
 
     const encodedUri = encodeURI(csvContent);
@@ -267,8 +268,9 @@ const Reports = ({ userRole, teachers }) => {
                   <th style={{ padding: '16px 20px' }}>Student Name</th>
                   <th style={{ padding: '16px 20px' }}>Class / Grade</th>
                   <th style={{ padding: '16px 20px' }}>RFID Card UID</th>
-                  <th style={{ padding: '16px 20px' }}>Arrival Date</th>
-                  <th style={{ padding: '16px 20px', textAlign: 'right' }}>Arrival Time</th>
+                  <th style={{ padding: '16px 20px' }}>Scan Date</th>
+                  <th style={{ padding: '16px 20px' }}>Scan Time</th>
+                  <th style={{ padding: '16px 20px', textAlign: 'right' }}>Type</th>
                 </tr>
               </thead>
               <tbody>
@@ -289,8 +291,23 @@ const Reports = ({ userRole, teachers }) => {
                     <td style={{ padding: '16px 20px', color: 'var(--text-secondary)' }}>
                       {new Date(log.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </td>
-                    <td style={{ padding: '16px 20px', textAlign: 'right', color: 'var(--success)', fontWeight: '600' }}>
+                    <td style={{ padding: '16px 20px', color: 'var(--text-secondary)' }}>
                       {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    </td>
+                    <td style={{ padding: '16px 20px', textAlign: 'right' }}>
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 'bold',
+                        color: log.type === 'exit' ? 'rgba(6, 182, 212, 1)' : 'rgba(16, 185, 129, 1)',
+                        background: log.type === 'exit' ? 'rgba(6, 182, 212, 0.08)' : 'rgba(16, 185, 129, 0.08)',
+                        padding: '3px 8px',
+                        borderRadius: '12px',
+                        border: log.type === 'exit' ? '1px solid rgba(6, 182, 212, 0.2)' : '1px solid rgba(16, 185, 129, 0.2)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em'
+                      }}>
+                        {log.type || 'entry'}
+                      </span>
                     </td>
                   </tr>
                 ))}
