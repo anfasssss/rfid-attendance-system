@@ -157,7 +157,7 @@ function App() {
 
   // Parent & Student Portal Integration
   if (currentUser.role === 'parent') {
-    return <ParentPortal role="parent" onLogout={handleLogout} />;
+    return <ParentPortal role="parent" parentPhone={currentUser.phone} onLogout={handleLogout} />;
   }
   if (currentUser.role === 'student') {
     return <ParentPortal role="student" studentRfid={currentUser.rfidUid} onLogout={handleLogout} />;

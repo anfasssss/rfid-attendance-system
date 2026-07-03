@@ -16,7 +16,7 @@ import {
   MessageIcon
 } from './Icons';
 
-const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
+const ParentPortal = ({ role = 'parent', parentPhone = '', studentRfid = '', onLogout }) => {
   const [phone, setPhone] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -64,13 +64,15 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
           });
       }
     } else {
-      const savedPhone = localStorage.getItem('parent_phone');
-      if (savedPhone) {
-        setPhone(savedPhone);
-        handleLogin(null, savedPhone);
+      const loginPhone = parentPhone || localStorage.getItem('parent_phone');
+      if (loginPhone) {
+        setPhone(loginPhone);
+        handleLogin(null, loginPhone);
+      } else {
+        setError('No verified phone session found.');
       }
     }
-  }, [role, studentRfid]);
+  }, [role, studentRfid, parentPhone]);
 
   const handleLogin = async (e, forcePhone = null) => {
     if (e) e.preventDefault();
