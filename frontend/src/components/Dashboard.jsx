@@ -68,8 +68,8 @@ const Dashboard = ({ userRole, teachers }) => {
   const absentCount = Math.max(0, studentsCount - presentCount);
   const attendanceRate = studentsCount > 0 ? Math.round((presentCount / studentsCount) * 100) : 0;
 
-  // Recent logs specifically for this filtered dashboard
-  const displayRecentLogs = classLogs.slice(0, 5);
+  // Recent logs specifically for this filtered dashboard (shows up to 15 logs with scroll)
+  const displayRecentLogs = classLogs.slice(0, 15);
 
   // Identify absent students for the selected class dashboard
   const presentStudentIds = Array.from(uniquePresent);
@@ -396,7 +396,14 @@ const Dashboard = ({ userRole, teachers }) => {
               No check-ins logged yet today.
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: '12px', 
+              maxHeight: '400px', 
+              overflowY: 'auto', 
+              paddingRight: '6px' 
+            }}>
               {displayRecentLogs.map((log) => {
                 const studentObj = students.find(s => s.id === log.studentId);
                 const imageUrl = studentObj?.imageUrl || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(log.studentName)}`;
@@ -436,11 +443,27 @@ const Dashboard = ({ userRole, teachers }) => {
                         </span>
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <span style={{ fontSize: '0.9rem', color: 'var(--success)', fontWeight: '500' }}>
-                        {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                      </span>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>RFID: {log.rfidUid}</p>
+                    <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {log.studentId !== 'unregistered' && log.type && (
+                          <span style={{
+                            fontSize: '0.65rem',
+                            fontWeight: 'bold',
+                            color: log.type === 'exit' ? 'rgba(6, 182, 212, 1)' : 'rgba(16, 185, 129, 1)',
+                            background: log.type === 'exit' ? 'rgba(6, 182, 212, 0.08)' : 'rgba(16, 185, 129, 0.08)',
+                            padding: '2px 6px',
+                            borderRadius: '10px',
+                            border: log.type === 'exit' ? '1px solid rgba(6, 182, 212, 0.2)' : '1px solid rgba(16, 185, 129, 0.2)',
+                            textTransform: 'uppercase'
+                          }}>
+                            {log.type}
+                          </span>
+                        )}
+                        <span style={{ fontSize: '0.9rem', color: 'var(--text-primary)', fontWeight: '600' }}>
+                          {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--text-muted)' }}>RFID: {log.rfidUid}</span>
                     </div>
                   </div>
                 );
