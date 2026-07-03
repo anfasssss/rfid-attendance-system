@@ -150,9 +150,12 @@ function App() {
     return <Login onLoginSuccess={setCurrentUser} />;
   }
 
-  // Parent Portal Integration
+  // Parent & Student Portal Integration
   if (currentUser.role === 'parent') {
-    return <ParentPortal onLogout={handleLogout} />;
+    return <ParentPortal role="parent" onLogout={handleLogout} />;
+  }
+  if (currentUser.role === 'student') {
+    return <ParentPortal role="student" studentRfid={currentUser.rfidUid} onLogout={handleLogout} />;
   }
 
   const navItems = [

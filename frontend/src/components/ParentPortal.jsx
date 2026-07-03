@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../firebaseConfig';
 import AttendanceHeatmap from './AttendanceHeatmap';
 
-const ParentPortal = ({ onLogout }) => {
+const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
   const [phone, setPhone] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  // Parent Data
+  // Data State
   const [students, setStudents] = useState([]);
   const [selectedStudentIndex, setSelectedStudentIndex] = useState(0);
   const [activeSubTab, setActiveSubTab] = useState('home'); // home, logs, fees, leaves, marks
@@ -25,14 +25,36 @@ const ParentPortal = ({ onLogout }) => {
 
   const activeStudent = students[selectedStudentIndex] || null;
 
-  // Auto-login if phone is in localStorage
+  // Auto-login on mount
   useEffect(() => {
-    const savedPhone = localStorage.getItem('parent_phone');
-    if (savedPhone) {
-      setPhone(savedPhone);
-      handleLogin(null, savedPhone);
+    if (role === 'student') {
+      if (studentRfid) {
+        setError('');
+        setLoading(true);
+        fetch(`${API_BASE_URL}/students/login?rfidUid=${encodeURIComponent(studentRfid)}`)
+          .then(res => {
+            if (!res.ok) throw new Error('Student details not found.');
+            return res.json();
+          })
+          .then(studentData => {
+            setStudents([studentData]);
+            setIsLoggedIn(true);
+          })
+          .catch(err => {
+            setError(err.message || 'Failed to retrieve student profile.');
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      }
+    } else {
+      const savedPhone = localStorage.getItem('parent_phone');
+      if (savedPhone) {
+        setPhone(savedPhone);
+        handleLogin(null, savedPhone);
+      }
     }
-  }, []);
+  }, [role, studentRfid]);
 
   const handleLogin = async (e, forcePhone = null) => {
     if (e) e.preventDefault();
@@ -78,10 +100,18 @@ const ParentPortal = ({ onLogout }) => {
 
   const reloadData = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/parents/students?phone=${encodeURIComponent(phone)}`);
-      if (res.ok) {
-        const data = await res.json();
-        setStudents(data);
+      if (role === 'student') {
+        const res = await fetch(`${API_BASE_URL}/students/login?rfidUid=${encodeURIComponent(studentRfid)}`);
+        if (res.ok) {
+          const studentData = await res.json();
+          setStudents([studentData]);
+        }
+      } else {
+        const res = await fetch(`${API_BASE_URL}/parents/students?phone=${encodeURIComponent(phone)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setStudents(data);
+        }
       }
     } catch (err) {
       console.error('Error refreshing portal details:', err);
@@ -142,7 +172,7 @@ const ParentPortal = ({ onLogout }) => {
     }
   };
 
-  // Login screen styling
+  // Login screen styling (only visible to parents if not logged in; students bypass this since they log in on root screen)
   if (!isLoggedIn) {
     return (
       <div style={{
@@ -160,26 +190,7 @@ const ParentPortal = ({ onLogout }) => {
           border: '1px solid var(--border-glass)',
           boxShadow: 'var(--shadow-glow)'
         }}>
-          <div style={{
-            width: '64px',
-            height: '64px',
-            borderRadius: '50%',
-            background: 'var(--primary-glow)',
-            color: 'var(--primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 20px auto',
-            border: '1.5px solid rgba(99, 102, 241, 0.2)'
-          }}>
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-          </div>
-
-          <h2 className="shimmer-text" style={{ fontSize: '1.75rem', marginBottom: '8px', fontWeight: '800' }}>Parent Portal</h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '30px' }}>
-            Enter your registered WhatsApp phone number to view your children's reports.
-          </p>
-
+          <h2 className="shimmer-text" style={{ fontSize: '1.75rem', marginBottom: '8px', fontWeight: '800' }}>Loading Portal...</h2>
           {error && (
             <div style={{
               background: 'var(--danger-glow)',
@@ -188,51 +199,14 @@ const ParentPortal = ({ onLogout }) => {
               padding: '12px',
               borderRadius: '8px',
               fontSize: '0.85rem',
-              marginBottom: '20px',
+              marginTop: '20px',
               textAlign: 'left',
               fontWeight: '500'
             }}>
               {error}
+              <button onClick={onLogout} style={{ display: 'block', marginTop: '10px', background: 'none', border: 'none', color: 'var(--text-primary)', textDecoration: 'underline', cursor: 'pointer' }}>Back to Login</button>
             </div>
           )}
-
-          <form onSubmit={handleLogin}>
-            <div style={{ marginBottom: '25px', textAlign: 'left' }}>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '600' }}>WhatsApp Phone Number</label>
-              <input 
-                type="text" 
-                placeholder="+919656108992" 
-                value={phone} 
-                onChange={(e) => setPhone(e.target.value)} 
-                required 
-              />
-            </div>
-
-            <button 
-              type="submit" 
-              disabled={loading} 
-              className="btn-primary" 
-              style={{ width: '100%', padding: '14px', borderRadius: '12px', fontWeight: 'bold' }}
-            >
-              {loading ? 'Verifying...' : 'Access Portal'}
-            </button>
-
-            <button 
-              type="button" 
-              onClick={onLogout} 
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--text-muted)',
-                fontSize: '0.85rem',
-                marginTop: '20px',
-                cursor: 'pointer',
-                textDecoration: 'underline'
-              }}
-            >
-              Go to Teacher/Admin Portal
-            </button>
-          </form>
         </div>
       </div>
     );
@@ -275,11 +249,15 @@ const ParentPortal = ({ onLogout }) => {
             justifyContent: 'center',
             fontWeight: 'bold'
           }}>
-            👨‍👩‍👦
+            {role === 'student' ? '🎒' : '👨‍👩‍👦'}
           </div>
           <div>
-            <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', fontWeight: '700' }}>Parent Portal</h3>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{phone}</span>
+            <h3 style={{ fontSize: '1.1rem', color: 'var(--text-primary)', fontWeight: '700' }}>
+              {role === 'student' ? 'Student Portal' : 'Parent Portal'}
+            </h3>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              {role === 'student' ? `Card UID: ${studentRfid}` : `Phone: ${phone}`}
+            </span>
           </div>
         </div>
         <button 
@@ -299,8 +277,8 @@ const ParentPortal = ({ onLogout }) => {
         </button>
       </header>
 
-      {/* Children Carousel Tab Selector */}
-      {students.length > 1 && (
+      {/* Children Carousel Tab Selector (Only visible for Parent role) */}
+      {role === 'parent' && students.length > 1 && (
         <div style={{
           display: 'flex',
           gap: '10px',
@@ -518,7 +496,8 @@ const ParentPortal = ({ onLogout }) => {
                   </div>
                 </div>
 
-                {remainingFees > 0 && (
+                {/* Hide Pay button for Student Role */}
+                {role === 'parent' && remainingFees > 0 && (
                   <button 
                     onClick={() => setShowPayModal(true)} 
                     className="btn-primary" 
@@ -526,6 +505,12 @@ const ParentPortal = ({ onLogout }) => {
                   >
                     💸 Pay Fees Now
                   </button>
+                )}
+
+                {role === 'student' && (
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.02)', padding: '10px', borderRadius: '8px' }}>
+                    🔒 Payments are restricted to Parent login.
+                  </div>
                 )}
               </div>
 
@@ -571,15 +556,20 @@ const ParentPortal = ({ onLogout }) => {
               <div className="glass-panel" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <h4 style={{ fontSize: '1.05rem', color: 'var(--text-primary)', fontWeight: '700' }}>Excuse Sick Leaves</h4>
-                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>Submit leave requests directly to class teacher.</p>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    {role === 'student' ? 'Leave excuse submissions logged by parents.' : 'Submit leave requests directly to class teacher.'}
+                  </p>
                 </div>
-                <button 
-                  onClick={() => setShowLeaveModal(true)} 
-                  className="btn-primary" 
-                  style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 'bold' }}
-                >
-                  ➕ Request Leave
-                </button>
+                {/* Hide Request Leave button for Student Role */}
+                {role === 'parent' && (
+                  <button 
+                    onClick={() => setShowLeaveModal(true)} 
+                    className="btn-primary" 
+                    style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 'bold' }}
+                  >
+                    ➕ Request Leave
+                  </button>
+                )}
               </div>
 
               {/* Leave Requests stream */}

@@ -122,6 +122,40 @@ app.post('/api/scan', async (req, res) => {
   }
 });
 
+// Student Login API endpoint
+// GET: Fetch student profile for student login using RFID Card UID
+app.get('/api/students/login', async (req, res) => {
+  const { rfidUid } = req.query;
+  if (!rfidUid) {
+    return res.status(400).json({ error: 'rfidUid query parameter is required' });
+  }
+
+  try {
+    const student = await dbService.getStudentByRfid(rfidUid);
+    if (!student) {
+      return res.status(404).json({ error: 'Student RFID Card not registered.' });
+    }
+
+    const allLogs = await dbService.getAttendanceLogs();
+    const allLeaves = await dbService.getLeaves();
+    const allPayments = await dbService.getPayments();
+
+    const logs = allLogs.filter(l => l.studentId === student.id);
+    const leaves = allLeaves.filter(l => l.studentId === student.id);
+    const payments = allPayments.filter(p => p.studentId === student.id);
+
+    res.json({
+      ...student,
+      logs,
+      leaves,
+      payments
+    });
+  } catch (error) {
+    console.error('Error verifying student login:', error.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Parent Portal API endpoints
 // GET: Fetch all students linked to a parent phone number
 app.get('/api/parents/students', async (req, res) => {
