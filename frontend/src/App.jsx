@@ -105,7 +105,12 @@ function App() {
       return;
     }
 
-    const cleanEmail = currentUser.email.toLowerCase().trim();
+    if (currentUser.role === 'parent' || currentUser.role === 'student') {
+      setUserRole({ role: currentUser.role });
+      return;
+    }
+
+    const cleanEmail = (currentUser.email || '').toLowerCase().trim();
     const matchedTeacher = teachers.find(t => t.email.toLowerCase().trim() === cleanEmail);
 
     if (matchedTeacher) {
