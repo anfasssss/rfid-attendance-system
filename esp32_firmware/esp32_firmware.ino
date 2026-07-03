@@ -71,7 +71,7 @@
 // --- CONFIGURATION ---
 const char* ssid = "Hipower:Broadband";             // Replace with your Wi-Fi SSID
 const char* password = "abcd1234";                 // Replace with your Wi-Fi Password
-const char* serverUrl = "http://192.168.30.6:5001/api/scan"; // Replace with your Node.js server IP
+const char* serverUrl = "https://rfid-attendance-system-ie52.onrender.com/api/scan"; // Replace with your Node.js server IP
 
 // --- HARDWARE PIN OUTS ---
 #define RST_PIN     14  // Relocated to GPIO 14 to allow free I2C SCL pin on GPIO 22
