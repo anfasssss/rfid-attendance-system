@@ -56,7 +56,7 @@ app.get('/api/health', (req, res) => {
 
 // Cache to prevent duplicate double scans (cooldown)
 const recentScansCache = new Map();
-const COOLDOWN_MS = 5 * 60 * 1000; // 5 minutes
+const COOLDOWN_MS = 10 * 1000; // 10 seconds cooldown for easier testing
 
 // POST: Receive RFID scans from ESP32
 app.post('/api/scan', async (req, res) => {
