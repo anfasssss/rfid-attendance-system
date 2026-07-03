@@ -475,20 +475,24 @@ const LiveFeed = ({ userRole }) => {
       {/* Futuristic Quick Register modal shortcut pop-up */}
       {showRegisterModal && (
         <div className="modal-overlay">
-          <div className="glass-panel modal-card border-beam-card" style={{
+          <div className="glass-panel modal-card" style={{
             maxWidth: '500px',
-            padding: '35px'
+            padding: '35px',
+            background: '#ffffff',
+            color: '#0f172a',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
           }}>
-            <h2 className="shimmer-text" style={{ fontSize: '1.6rem', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="svg-icon" style={{ color: 'var(--primary)' }}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" y1="8" x2="20" y2="14" /><line x1="17" y1="11" x2="23" y2="11" /></svg>
+            <h2 style={{ fontSize: '1.6rem', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '10px', color: '#0f172a', fontWeight: '800' }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="svg-icon" style={{ color: '#6366f1' }}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" y1="8" x2="20" y2="14" /><line x1="17" y1="11" x2="23" y2="11" /></svg>
               Quick Card Linker
             </h2>
 
             {registerError && (
               <div style={{ 
-                background: 'var(--danger-glow)', 
-                border: '1px solid var(--danger)', 
-                color: 'var(--danger)', 
+                background: 'rgba(239, 68, 68, 0.08)', 
+                border: '1px solid rgba(239, 68, 68, 0.5)', 
+                color: '#ef4444', 
                 padding: '12px', 
                 borderRadius: '8px', 
                 fontSize: '0.85rem', 
@@ -496,7 +500,7 @@ const LiveFeed = ({ userRole }) => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                fontWeight: '500'
+                fontWeight: '600'
               }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="svg-icon"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
                 <span>{registerError}</span>
@@ -505,44 +509,97 @@ const LiveFeed = ({ userRole }) => {
 
             <form onSubmit={handleQuickRegisterSubmit}>
               <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '500' }}>RFID Card UID (Hex Linked)</label>
+                <label style={{ display: 'block', fontSize: '0.825rem', color: '#475569', marginBottom: '8px', fontWeight: '600' }}>RFID Card UID (Hex Linked)</label>
                 <input 
                   type="text" 
                   value={quickRfidUid} 
                   disabled 
-                  style={{ fontFamily: 'monospace', background: 'rgba(0,0,0,0.03)', fontWeight: 'bold', color: 'var(--primary)' }} 
+                  style={{ fontFamily: 'monospace', background: '#f1f5f9', fontWeight: 'bold', color: '#6366f1', border: '1px solid #e2e8f0', padding: '12px 16px', width: '100%', borderRadius: '12px' }} 
                 />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '500' }}>Student Name *</label>
-                  <input type="text" placeholder="John Doe" value={name} onChange={(e) => setName(e.target.value)} required />
+                  <label style={{ display: 'block', fontSize: '0.825rem', color: '#475569', marginBottom: '8px', fontWeight: '600' }}>Student Name *</label>
+                  <input 
+                    type="text" 
+                    placeholder="John Doe" 
+                    value={name} 
+                    onChange={(e) => setName(e.target.value)} 
+                    required 
+                    style={{ background: '#ffffff', color: '#0f172a', border: '1px solid #cbd5e1', padding: '12px 16px', width: '100%', borderRadius: '12px' }}
+                  />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '500' }}>Grade / Class *</label>
-                  <input type="text" placeholder="Grade 10-A" value={grade} onChange={(e) => setGrade(e.target.value)} required />
+                  <label style={{ display: 'block', fontSize: '0.825rem', color: '#475569', marginBottom: '8px', fontWeight: '600' }}>Grade / Class *</label>
+                  <input 
+                    type="text" 
+                    placeholder="Grade 10-A" 
+                    value={grade} 
+                    onChange={(e) => setGrade(e.target.value)} 
+                    required 
+                    style={{ background: '#ffffff', color: '#0f172a', border: '1px solid #cbd5e1', padding: '12px 16px', width: '100%', borderRadius: '12px' }}
+                  />
                 </div>
               </div>
 
-              <hr style={{ border: 'none', borderTop: '1px solid rgba(0,0,0,0.05)', margin: '25px 0' }} />
+              <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0', margin: '25px 0' }} />
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '30px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '500' }}>Parent Name *</label>
-                  <input type="text" placeholder="Mary Doe" value={parentName} onChange={(e) => setParentName(e.target.value)} required />
+                  <label style={{ display: 'block', fontSize: '0.825rem', color: '#475569', marginBottom: '8px', fontWeight: '600' }}>Parent Name *</label>
+                  <input 
+                    type="text" 
+                    placeholder="Mary Doe" 
+                    value={parentName} 
+                    onChange={(e) => setParentName(e.target.value)} 
+                    required 
+                    style={{ background: '#ffffff', color: '#0f172a', border: '1px solid #cbd5e1', padding: '12px 16px', width: '100%', borderRadius: '12px' }}
+                  />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '500' }}>WhatsApp Phone *</label>
-                  <input type="text" placeholder="+919876543210" value={parentPhone} onChange={(e) => setParentPhone(e.target.value)} required />
+                  <label style={{ display: 'block', fontSize: '0.825rem', color: '#475569', marginBottom: '8px', fontWeight: '600' }}>WhatsApp Phone *</label>
+                  <input 
+                    type="text" 
+                    placeholder="+919876543210" 
+                    value={parentPhone} 
+                    onChange={(e) => setParentPhone(e.target.value)} 
+                    required 
+                    style={{ background: '#ffffff', color: '#0f172a', border: '1px solid #cbd5e1', padding: '12px 16px', width: '100%', borderRadius: '12px' }}
+                  />
                 </div>
               </div>
 
               <div style={{ display: 'flex', gap: '15px', justifyContent: 'flex-end' }}>
-                <button type="button" onClick={() => setShowRegisterModal(false)} className="btn-secondary" style={{ padding: '10px 20px' }}>
+                <button 
+                  type="button" 
+                  onClick={() => setShowRegisterModal(false)} 
+                  style={{ 
+                    padding: '10px 20px', 
+                    background: '#f1f5f9', 
+                    color: '#475569', 
+                    border: '1px solid #e2e8f0', 
+                    borderRadius: '8px', 
+                    cursor: 'pointer',
+                    fontWeight: '600'
+                  }}
+                >
                   Cancel
                 </button>
-                <button type="submit" disabled={registerLoading} className="btn-primary" style={{ padding: '10px 24px' }}>
+                <button 
+                  type="submit" 
+                  disabled={registerLoading} 
+                  style={{ 
+                    padding: '10px 24px', 
+                    background: '#6366f1', 
+                    color: '#ffffff', 
+                    border: 'none', 
+                    borderRadius: '8px', 
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    boxShadow: '0 4px 6px -1px rgba(99, 102, 241, 0.3)'
+                  }}
+                >
                   {registerLoading ? 'Linking...' : 'Complete Linking'}
                 </button>
               </div>
