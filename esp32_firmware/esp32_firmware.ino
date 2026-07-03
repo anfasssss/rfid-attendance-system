@@ -69,8 +69,8 @@
 #endif
 
 // --- CONFIGURATION ---
-const char* ssid = "Hipower:Broadband";             // Replace with your Wi-Fi SSID
-const char* password = "abcd1234";                 // Replace with your Wi-Fi Password
+const char* ssid = "Taste Buds";             // Replace with your Wi-Fi SSID
+const char* password = "ansarali134";                 // Replace with your Wi-Fi Password
 const char* serverUrl = "https://rfid-attendance-system-ie52.onrender.com/api/scan"; // Replace with your Node.js server IP
 
 // --- HARDWARE PIN OUTS ---
