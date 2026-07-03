@@ -12,7 +12,8 @@ import {
   InfoIcon, 
   CheckIcon,
   StudentIcon,
-  ParentIcon
+  ParentIcon,
+  MessageIcon
 } from './Icons';
 
 const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
@@ -23,8 +24,9 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
   
   // Data State
   const [students, setStudents] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [selectedStudentIndex, setSelectedStudentIndex] = useState(0);
-  const [activeSubTab, setActiveSubTab] = useState('home'); // home, logs, fees, leaves, marks
+  const [activeSubTab, setActiveSubTab] = useState('home'); // home, logs, messages, fees, leaves, marks
 
   // Payment Modal State
   const [showPayModal, setShowPayModal] = useState(false);
@@ -51,6 +53,7 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
           })
           .then(studentData => {
             setStudents([studentData]);
+            setNotifications(studentData.notifications || []);
             setIsLoggedIn(true);
           })
           .catch(err => {
@@ -86,11 +89,16 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
       if (!res.ok) throw new Error('Failed to connect to local server.');
       const data = await res.json();
       
-      if (data.length === 0) {
+      // Handle the new response shape: { students, notifications }
+      const fetchedStudents = data.students || [];
+      const fetchedNotifications = data.notifications || [];
+
+      if (fetchedStudents.length === 0) {
         throw new Error('No students linked to this phone number. Make sure to include the country code (e.g. +919656108992).');
       }
 
-      setStudents(data);
+      setStudents(fetchedStudents);
+      setNotifications(fetchedNotifications);
       setIsLoggedIn(true);
       localStorage.setItem('parent_phone', loginPhone);
     } catch (err) {
@@ -105,6 +113,7 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
     localStorage.removeItem('parent_phone');
     setIsLoggedIn(false);
     setStudents([]);
+    setNotifications([]);
     setPhone('');
     setSelectedStudentIndex(0);
     setActiveSubTab('home');
@@ -118,12 +127,14 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
         if (res.ok) {
           const studentData = await res.json();
           setStudents([studentData]);
+          setNotifications(studentData.notifications || []);
         }
       } else {
         const res = await fetch(`${API_BASE_URL}/parents/students?phone=${encodeURIComponent(phone)}`);
         if (res.ok) {
           const data = await res.json();
-          setStudents(data);
+          setStudents(data.students || []);
+          setNotifications(data.notifications || []);
         }
       }
     } catch (err) {
@@ -203,7 +214,7 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
           border: '1px solid var(--border-glass)',
           boxShadow: 'var(--shadow-glow)'
         }}>
-          <h2 className="shimmer-text" style={{ fontSize: '1.5rem', marginBottom: '8px', fontWeight: '800' }}>Retrieving Secure Logs</h2>
+          <h2 className="shimmer-text" style={{ fontSize: '1.5rem', marginBottom: '8px', fontWeight: '800' }}>Retrieving Secure Workspace</h2>
           <div style={{ margin: '20px 0', height: '2px', background: 'var(--border-glass)', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', height: '100%', width: '40%', background: 'var(--primary)', animation: 'shimmer 1.5s infinite ease-in-out' }} />
           </div>
@@ -230,7 +241,9 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
   // Calculate student attendance rate
   const totalLogs = activeStudent?.logs?.length || 0;
   const attendanceRate = Math.min(100, Math.max(0, Math.round((totalLogs / 30) * 100)));
-  
+  const totalLeaves = activeStudent?.leaves?.filter(l => l.status === 'Approved').length || 0;
+  const totalAbsences = Math.max(0, 30 - totalLogs - totalLeaves);
+
   // Calculate payments
   const totalPaid = activeStudent?.payments?.reduce((sum, p) => sum + p.amount, 0) || 0;
   const totalFeesDue = 15000;
@@ -270,7 +283,7 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
               {role === 'student' ? 'Student Workspace' : 'Parent Console'}
             </h3>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              {role === 'student' ? `Signature RFID: ${studentRfid}` : `Verified Phone: ${phone}`}
+              {role === 'student' ? `Card UID: ${studentRfid}` : `Verified Phone: ${phone}`}
             </span>
           </div>
         </div>
@@ -370,10 +383,10 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
             }}
           />
           <div style={{ textAlign: 'left' }}>
-            <h2 style={{ fontSize: '1.35rem', color: 'var(--text-primary)', fontWeight: '800', marginBottom: '4px' }}>
+            <h2 style={{ fontSize: '1.35rem', color: 'var(--text-primary)', fontWeight: '800', marginBottom: '2px' }}>
               {activeStudent.name}
             </h2>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '6px' }}>
               <span style={{ fontSize: '0.75rem', background: 'rgba(99,102,241,0.08)', color: 'var(--primary)', padding: '2px 8px', borderRadius: '12px', fontWeight: '600' }}>
                 {activeStudent.grade}
               </span>
@@ -382,6 +395,14 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
                 {activeStudent.rfidUid}
               </span>
             </div>
+            
+            {/* ENROLLED/ADDED TIMELINE TAG - View when children are added */}
+            {activeStudent.createdAt && (
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'var(--bg-hover)', padding: '3px 8px', borderRadius: '6px', border: '1px solid var(--border-glass)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ width: '4px', height: '4px', background: 'var(--success)', borderRadius: '50%' }} />
+                Enrolled: {new Date(activeStudent.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+              </span>
+            )}
           </div>
         </div>
       )}
@@ -468,9 +489,26 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
             </div>
           )}
 
-          {/* TAB 2: LOGS & HEATMAP */}
+          {/* TAB 2: LOGS & HEATMAP - ATTENDANCE REPORT */}
           {activeSubTab === 'logs' && (
             <div className="animate-float-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              
+              {/* Detailed Monthly Stats Card - "Attendance Report" details */}
+              <div className="glass-panel" style={{ padding: '20px', border: '1px solid var(--border-glass)', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', textAlign: 'center' }}>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Present Days</span>
+                  <p style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--success)', marginTop: '4px' }}>{totalLogs}</p>
+                </div>
+                <div style={{ borderLeft: '1px solid var(--border-glass)', borderRight: '1px solid var(--border-glass)' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Leaves Excused</span>
+                  <p style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--primary)', marginTop: '4px' }}>{totalLeaves}</p>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Absences</span>
+                  <p style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--danger)', marginTop: '4px' }}>{totalAbsences}</p>
+                </div>
+              </div>
+
               <div className="glass-panel" style={{ padding: '20px', border: '1px solid var(--border-glass)' }}>
                 <h4 style={{ fontSize: '1.05rem', color: 'var(--text-primary)', marginBottom: '15px', fontWeight: '700', textAlign: 'left' }}>Daily Attendance Grid</h4>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -524,7 +562,46 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
             </div>
           )}
 
-          {/* TAB 3: FEES & PAYMENTS */}
+          {/* TAB 3: REAL-TIME MESSAGES INBOX */}
+          {activeSubTab === 'messages' && (
+            <div className="animate-float-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div className="glass-panel" style={{ padding: '20px', border: '1px solid var(--border-glass)' }}>
+                <h4 style={{ fontSize: '1.05rem', color: 'var(--text-primary)', marginBottom: '15px', fontWeight: '700', textAlign: 'left', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <MessageIcon size={18} />
+                  <span>Received System Alerts</span>
+                </h4>
+                
+                {notifications.length === 0 ? (
+                  <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '30px' }}>No messages received yet.</p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '450px', overflowY: 'auto' }}>
+                    {notifications.map(notif => (
+                      <div key={notif.id} style={{
+                        padding: '16px',
+                        borderRadius: '12px',
+                        background: 'rgba(255, 255, 255, 0.02)',
+                        border: '1px solid var(--border-glass)',
+                        textAlign: 'left',
+                        position: 'relative'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                            {new Date(notif.timestamp).toLocaleDateString()} {new Date(notif.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                          <span style={{ width: '6px', height: '6px', background: 'var(--primary)', borderRadius: '50%' }} />
+                        </div>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5', whiteSpace: 'pre-line' }}>
+                          {notif.message}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: FEES & PAYMENTS */}
           {activeSubTab === 'fees' && (
             <div className="animate-float-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Fee balance card */}
@@ -601,7 +678,7 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
             </div>
           )}
 
-          {/* TAB 4: LEAVE REQUESTS */}
+          {/* TAB 5: LEAVE REQUESTS */}
           {activeSubTab === 'leaves' && (
             <div className="animate-float-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div className="glass-panel" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid var(--border-glass)' }}>
@@ -668,7 +745,7 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
             </div>
           )}
 
-          {/* TAB 5: REPORT CARD (EXAM MARKS) */}
+          {/* TAB 6: REPORT CARD (EXAM MARKS) */}
           {activeSubTab === 'marks' && (
             <div className="animate-float-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div className="glass-panel" style={{ padding: '24px', border: '1px solid var(--border-glass)' }}>
@@ -716,7 +793,7 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
         backdropFilter: 'blur(20px)',
         border: '1px solid var(--border-glass)',
         borderRadius: '30px',
-        padding: '10px 15px',
+        padding: '10px 10px',
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'center',
@@ -731,14 +808,14 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '5px',
+            gap: '4px',
             color: activeSubTab === 'home' ? 'var(--primary)' : '#64748b',
             cursor: 'pointer',
-            fontSize: '0.75rem',
+            fontSize: '0.7rem',
             fontWeight: activeSubTab === 'home' ? '700' : '500'
           }}
         >
-          <HomeIcon size={20} color={activeSubTab === 'home' ? 'var(--primary)' : '#64748b'} />
+          <HomeIcon size={18} color={activeSubTab === 'home' ? 'var(--primary)' : '#64748b'} />
           <span>Home</span>
         </button>
 
@@ -750,15 +827,34 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '5px',
+            gap: '4px',
             color: activeSubTab === 'logs' ? 'var(--primary)' : '#64748b',
             cursor: 'pointer',
-            fontSize: '0.75rem',
+            fontSize: '0.7rem',
             fontWeight: activeSubTab === 'logs' ? '700' : '500'
           }}
         >
-          <LogsIcon size={20} color={activeSubTab === 'logs' ? 'var(--primary)' : '#64748b'} />
-          <span>Logs</span>
+          <LogsIcon size={18} color={activeSubTab === 'logs' ? 'var(--primary)' : '#64748b'} />
+          <span>Report</span>
+        </button>
+
+        <button
+          onClick={() => setActiveSubTab('messages')}
+          style={{
+            background: 'none',
+            border: 'none',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '4px',
+            color: activeSubTab === 'messages' ? 'var(--primary)' : '#64748b',
+            cursor: 'pointer',
+            fontSize: '0.7rem',
+            fontWeight: activeSubTab === 'messages' ? '700' : '500'
+          }}
+        >
+          <MessageIcon size={18} color={activeSubTab === 'messages' ? 'var(--primary)' : '#64748b'} />
+          <span>Inbox</span>
         </button>
 
         <button
@@ -769,14 +865,14 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '5px',
+            gap: '4px',
             color: activeSubTab === 'fees' ? 'var(--primary)' : '#64748b',
             cursor: 'pointer',
-            fontSize: '0.75rem',
+            fontSize: '0.7rem',
             fontWeight: activeSubTab === 'fees' ? '700' : '500'
           }}
         >
-          <FeesIcon size={20} color={activeSubTab === 'fees' ? 'var(--primary)' : '#64748b'} />
+          <FeesIcon size={18} color={activeSubTab === 'fees' ? 'var(--primary)' : '#64748b'} />
           <span>Fees</span>
         </button>
 
@@ -788,14 +884,14 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '5px',
+            gap: '4px',
             color: activeSubTab === 'leaves' ? 'var(--primary)' : '#64748b',
             cursor: 'pointer',
-            fontSize: '0.75rem',
+            fontSize: '0.7rem',
             fontWeight: activeSubTab === 'leaves' ? '700' : '500'
           }}
         >
-          <LeavesIcon size={20} color={activeSubTab === 'leaves' ? 'var(--primary)' : '#64748b'} />
+          <LeavesIcon size={18} color={activeSubTab === 'leaves' ? 'var(--primary)' : '#64748b'} />
           <span>Leaves</span>
         </button>
 
@@ -807,15 +903,15 @@ const ParentPortal = ({ role = 'parent', studentRfid = '', onLogout }) => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '5px',
+            gap: '4px',
             color: activeSubTab === 'marks' ? 'var(--primary)' : '#64748b',
             cursor: 'pointer',
-            fontSize: '0.75rem',
+            fontSize: '0.7rem',
             fontWeight: activeSubTab === 'marks' ? '700' : '500'
           }}
         >
-          <ReportsIcon size={20} color={activeSubTab === 'marks' ? 'var(--primary)' : '#64748b'} />
-          <span>Reports</span>
+          <ReportsIcon size={18} color={activeSubTab === 'marks' ? 'var(--primary)' : '#64748b'} />
+          <span>Grades</span>
         </button>
       </nav>
 

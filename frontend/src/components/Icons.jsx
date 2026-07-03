@@ -107,3 +107,9 @@ export const CheckIcon = ({ className = '', size = 18, strokeWidth = 2.5, color 
     <polyline points="20 6 9 17 4 12" />
   </svg>
 );
+
+export const MessageIcon = ({ className = '', size = 20, strokeWidth = 2, color = 'currentColor' }) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>
+);

@@ -576,6 +576,53 @@ const dbService = {
       const docRef = await db.collection('payments').add(paymentRecord);
       return { id: docRef.id, ...paymentRecord };
     }
+  },
+
+  // 16. Messages & Notifications log operations
+  logNotification: async (phone, message) => {
+    const record = {
+      phone: phone.trim().replace(/\D/g, ''),
+      message: message,
+      timestamp: new Date().toISOString()
+    };
+    if (isMock) {
+      const data = readMockDb();
+      if (!data.notifications) data.notifications = [];
+      const id = 'notif_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+      const newNotif = { id, ...record };
+      data.notifications.push(newNotif);
+      writeMockDb(data);
+      return newNotif;
+    } else {
+      const ref = await db.collection('notifications').add(record);
+      return { id: ref.id, ...record };
+    }
+  },
+
+  getNotificationsByPhone: async (phone) => {
+    const normalized = phone.trim().replace(/\D/g, '');
+    if (isMock) {
+      const data = readMockDb();
+      if (!data.notifications) data.notifications = [];
+      const notifs = data.notifications.filter(n => {
+        const p = n.phone.replace(/\D/g, '');
+        return p === normalized || p.includes(normalized) || normalized.includes(p);
+      });
+      notifs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      return notifs;
+    } else {
+      const snapshot = await db.collection('notifications').get();
+      const results = [];
+      snapshot.forEach(doc => {
+        const n = doc.data();
+        const p = (n.phone || '').replace(/\D/g, '');
+        if (p === normalized || p.includes(normalized) || normalized.includes(p)) {
+          results.push({ id: doc.id, ...n });
+        }
+      });
+      results.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      return results;
+    }
   }
 };
 

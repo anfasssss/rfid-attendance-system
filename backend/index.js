@@ -143,12 +143,14 @@ app.get('/api/students/login', async (req, res) => {
     const logs = allLogs.filter(l => l.studentId === student.id);
     const leaves = allLeaves.filter(l => l.studentId === student.id);
     const payments = allPayments.filter(p => p.studentId === student.id);
+    const notifications = await dbService.getNotificationsByPhone(student.parentPhone || '');
 
     res.json({
       ...student,
       logs,
       leaves,
-      payments
+      payments,
+      notifications
     });
   } catch (error) {
     console.error('Error verifying student login:', error.message);
@@ -169,6 +171,7 @@ app.get('/api/parents/students', async (req, res) => {
     const allLogs = await dbService.getAttendanceLogs();
     const allLeaves = await dbService.getLeaves();
     const allPayments = await dbService.getPayments();
+    const notifications = await dbService.getNotificationsByPhone(phone);
     
     const enrichedStudents = students.map(student => {
       const logs = allLogs.filter(l => l.studentId === student.id);
@@ -183,7 +186,10 @@ app.get('/api/parents/students', async (req, res) => {
       };
     });
 
-    res.json(enrichedStudents);
+    res.json({
+      students: enrichedStudents,
+      notifications
+    });
   } catch (error) {
     console.error('Error fetching parent students details:', error.message);
     res.status(500).json({ error: 'Internal server error' });
@@ -199,6 +205,18 @@ app.post('/api/parents/payments', async (req, res) => {
 
   try {
     const payment = await dbService.recordPayment(studentId, amount);
+    
+    // Log message history
+    try {
+      const studentsList = await dbService.getStudents();
+      const student = studentsList.find(s => s.id === studentId);
+      if (student) {
+        await dbService.logNotification(student.parentPhone, `Payment Recorded: Receipt confirmation for tuition installment of ₹${Number(amount).toLocaleString()} received successfully for ${student.name}.`);
+      }
+    } catch (err) {
+      console.error('Failed to log payment notification:', err.message);
+    }
+
     res.json({ status: 'success', payment });
   } catch (error) {
     console.error('Error recording parent payment:', error.message);
@@ -221,6 +239,14 @@ app.post('/api/parents/leaves', async (req, res) => {
     }
 
     const leave = await dbService.logLeave(student, reason, 'Pending');
+    
+    // Log message history
+    try {
+      await dbService.logNotification(student.parentPhone, `Leave Request: Sick leave excuse requested for ${student.name}. Status: Pending review.`);
+    } catch (err) {
+      console.error('Failed to log leave creation notification:', err.message);
+    }
+
     res.json({ status: 'success', leave });
   } catch (error) {
     console.error('Error recording parent leave request:', error.message);
@@ -318,6 +344,17 @@ app.put('/api/leaves/:id', async (req, res) => {
   try {
     const { status } = req.body;
     const updated = await dbService.updateLeaveStatus(req.params.id, status);
+    
+    // Log status update to message history
+    try {
+      const students = await dbService.getStudents();
+      const student = students.find(s => s.id === updated.studentId);
+      if (student) {
+        await dbService.logNotification(student.parentPhone, `Leave Request Status: Sick leave excuse for ${student.name} has been ${status.toUpperCase()}.`);
+      }
+    } catch (err) {
+      console.error('Failed to log leave status update notification:', err.message);
+    }
     
     // If approved, trigger WhatsApp notification to parent
     if (status === 'Approved') {
@@ -875,6 +912,14 @@ async function sendInstantAttendanceNotification(student, timestamp, type) {
   const actionWord = type === 'exit' ? 'left' : 'entered';
   const actionIcon = type === 'exit' ? '🚪👋' : '🏫✅';
   const alertMsg = `🔔 *Attendance Alert* 🔔\n\nHello Mr./Mrs. ${student.parentName || 'Parent'},\nWe are pleased to inform you that your child *${student.name}* has *${actionWord}* school safely today at *${timeStr}*. ${actionIcon}`;
+
+  // Log to parent workspace notification logs history
+  try {
+    const dbMsg = `Attendance Alert: We are pleased to inform you that your child ${student.name} has ${actionWord} school safely today at ${timeStr}.`;
+    await dbService.logNotification(student.parentPhone, dbMsg);
+  } catch (dbErr) {
+    console.error('❌ Failed to log notification to database:', dbErr.message);
+  }
 
   if (PROVIDER === 'twilio' && twilioClient) {
     try {
