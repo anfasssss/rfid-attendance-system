@@ -69,6 +69,8 @@ app.post('/api/scan', async (req, res) => {
   const normalizedUid = rfidUid.trim().replace(/[\s:-]+/g, '').toUpperCase();
   console.log(`🏷️  [RFID Scan Event] Scanned Card UID: ${rfidUid}`);
 
+
+
   try {
     const student = await dbService.getStudentByRfid(rfidUid);
     
