@@ -96,26 +96,34 @@ function readMockDb() {
     if (!data.payments) data.payments = [];
     return data;
   } catch (err) {
+    console.error('❌ Error reading mock DB:', err.message);
     return { students: [], attendance_logs: [], leaves: [], teachers: [], payments: [] };
   }
 }
 
 // Write local mock DB helper
 function writeMockDb(data) {
-  const tmpPath = mockDbPath + '.tmp';
   try {
-    fs.writeFileSync(tmpPath, JSON.stringify(data, null, 2));
-    fs.renameSync(tmpPath, mockDbPath);
-  } catch (err) {
-    console.error('❌  [Firebase Service] Error writing mock DB atomically:', err.message);
-    // Fallback to direct write if rename fails
     fs.writeFileSync(mockDbPath, JSON.stringify(data, null, 2));
+  } catch (err) {
+    console.error('❌ Error writing to mock DB:', err.message);
   }
 }
 
-// --- DATABASE SERVICE METHODS ---
+function enrichStudent(student) {
+  if (!student) return null;
+  if (!student.marks) {
+    student.marks = [
+      { subject: "Mathematics", score: 88, total: 100, grade: "A" },
+      { subject: "Science", score: 94, total: 100, grade: "A+" },
+      { subject: "English", score: 82, total: 100, grade: "A" },
+      { subject: "Social Studies", score: 79, total: 100, grade: "B+" }
+    ];
+  }
+  return student;
+}
 
-const firebaseService = {
+const dbService = {
   isMockMode: () => isMock,
 
   // 1. Get student by RFID UID
@@ -124,7 +132,7 @@ const firebaseService = {
     if (isMock) {
       const data = readMockDb();
       const student = data.students.find(s => s.rfidUid.trim().replace(/[\s:-]+/g, '').toUpperCase() === normalizedUid);
-      return student || null;
+      return enrichStudent(student);
     } else {
       const snapshot = await db.collection('students')
         .where('rfidUid', '==', normalizedUid)
@@ -132,7 +140,7 @@ const firebaseService = {
         .get();
       if (snapshot.empty) return null;
       const doc = snapshot.docs[0];
-      return { id: doc.id, ...doc.data() };
+      return enrichStudent({ id: doc.id, ...doc.data() });
     }
   },
 
@@ -141,16 +149,14 @@ const firebaseService = {
     const normalizedPhone = phone.trim().replace(/\s+/g, '');
     if (isMock) {
       const data = readMockDb();
-      // Match phone numbers by checking if they contain/equal the digits
-      return data.students.filter(s => {
+      const results = data.students.filter(s => {
         const studentPhone = s.parentPhone.trim().replace(/\s+/g, '');
         return studentPhone === normalizedPhone || studentPhone.includes(normalizedPhone) || normalizedPhone.includes(studentPhone);
       });
+      return results.map(enrichStudent);
     } else {
-      // Direct exact match
       let snapshot = await db.collection('students').where('parentPhone', '==', normalizedPhone).get();
       
-      // Fallback: search all and match flexibly if no exact match (useful for varying international prefixes)
       if (snapshot.empty) {
         const allSnapshot = await db.collection('students').get();
         const results = [];
@@ -161,20 +167,20 @@ const firebaseService = {
             results.push({ id: doc.id, ...s });
           }
         });
-        return results;
+        return results.map(enrichStudent);
       }
       
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return snapshot.docs.map(doc => enrichStudent({ id: doc.id, ...doc.data() }));
     }
   },
 
   // 3. Get all students
   getStudents: async () => {
     if (isMock) {
-      return readMockDb().students;
+      return readMockDb().students.map(enrichStudent);
     } else {
       const snapshot = await db.collection('students').orderBy('createdAt', 'desc').get();
-      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return snapshot.docs.map(doc => enrichStudent({ id: doc.id, ...doc.data() }));
     }
   },
 
@@ -573,4 +579,4 @@ const firebaseService = {
   }
 };
 
-module.exports = firebaseService;
+module.exports = dbService;

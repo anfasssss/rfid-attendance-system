@@ -236,6 +236,24 @@ const Login = ({ onLoginSuccess }) => {
           </button>
         </form>
 
+        <div style={{ marginTop: '20px', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '20px' }}>
+          <button 
+            type="button"
+            onClick={() => onLoginSuccess({ role: 'parent' })}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--primary)',
+              fontSize: '0.9rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              textDecoration: 'underline'
+            }}
+          >
+            👨‍👩‍👦 Are you a Parent? Enter Parent Portal
+          </button>
+        </div>
+
         <p style={{
           marginTop: '30px',
           color: 'var(--text-muted)',

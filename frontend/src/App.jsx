@@ -11,6 +11,7 @@ import LeaveReports from './components/LeaveReports';
 import FeesManagement from './components/FeesManagement';
 import ToastContainer from './components/ToastContainer';
 import ScanSimulator from './components/ScanSimulator';
+import ParentPortal from './components/ParentPortal';
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -147,6 +148,11 @@ function App() {
 
   if (!currentUser) {
     return <Login onLoginSuccess={setCurrentUser} />;
+  }
+
+  // Parent Portal Integration
+  if (currentUser.role === 'parent') {
+    return <ParentPortal onLogout={handleLogout} />;
   }
 
   const navItems = [

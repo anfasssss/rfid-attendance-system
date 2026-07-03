@@ -122,6 +122,78 @@ app.post('/api/scan', async (req, res) => {
   }
 });
 
+// Parent Portal API endpoints
+// GET: Fetch all students linked to a parent phone number
+app.get('/api/parents/students', async (req, res) => {
+  const { phone } = req.query;
+  if (!phone) {
+    return res.status(400).json({ error: 'phone query parameter is required' });
+  }
+
+  try {
+    const students = await dbService.getStudentsByParentPhone(phone);
+    const allLogs = await dbService.getAttendanceLogs();
+    const allLeaves = await dbService.getLeaves();
+    const allPayments = await dbService.getPayments();
+    
+    const enrichedStudents = students.map(student => {
+      const logs = allLogs.filter(l => l.studentId === student.id);
+      const leaves = allLeaves.filter(l => l.studentId === student.id);
+      const payments = allPayments.filter(p => p.studentId === student.id);
+      
+      return {
+        ...student,
+        logs,
+        leaves,
+        payments
+      };
+    });
+
+    res.json(enrichedStudents);
+  } catch (error) {
+    console.error('Error fetching parent students details:', error.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST: Record a parent mock fee payment
+app.post('/api/parents/payments', async (req, res) => {
+  const { studentId, amount } = req.body;
+  if (!studentId || !amount) {
+    return res.status(400).json({ error: 'studentId and amount are required' });
+  }
+
+  try {
+    const payment = await dbService.recordPayment(studentId, amount);
+    res.json({ status: 'success', payment });
+  } catch (error) {
+    console.error('Error recording parent payment:', error.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST: Submit a parent sick leave request
+app.post('/api/parents/leaves', async (req, res) => {
+  const { studentId, reason } = req.body;
+  if (!studentId || !reason) {
+    return res.status(400).json({ error: 'studentId and reason are required' });
+  }
+
+  try {
+    const students = await dbService.getStudents();
+    const student = students.find(s => s.id === studentId);
+    if (!student) {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    const leave = await dbService.logLeave(student, reason, 'Pending');
+    res.json({ status: 'success', leave });
+  } catch (error) {
+    console.error('Error recording parent leave request:', error.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Student Database CRUD Operations
 app.get('/api/students', async (req, res) => {
   try {
