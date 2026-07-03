@@ -76,7 +76,6 @@ const Login = ({ onLoginSuccess }) => {
         if (!res.ok) throw new Error('Verification request failed.');
         const data = await res.json();
         
-        // Match the object response shape { students, notifications }
         const students = data.students || [];
         if (students.length === 0) {
           throw new Error('No students found linked to this phone number.');
@@ -107,20 +106,19 @@ const Login = ({ onLoginSuccess }) => {
   return (
     <div style={{
       display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
       minHeight: '100vh',
-      padding: '20px',
+      width: '100vw',
       position: 'relative',
-      overflow: 'hidden'
+      background: 'var(--bg-base)',
+      color: 'var(--text-primary)'
     }}>
-      {/* Decorative background grid overlay */}
+      {/* Background dot layout */}
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
         backgroundImage: 'radial-gradient(var(--border-glass) 1.5px, transparent 1.5px)',
         backgroundSize: '24px 24px',
-        opacity: 0.15,
+        opacity: 0.12,
         pointerEvents: 'none',
         zIndex: 0
       }} />
@@ -133,8 +131,8 @@ const Login = ({ onLoginSuccess }) => {
           position: 'absolute',
           top: '30px',
           right: '30px',
-          background: 'var(--primary-glow)',
-          color: 'var(--primary)',
+          background: 'var(--bg-surface)',
+          color: 'var(--text-secondary)',
           border: '1px solid var(--border-glass)',
           padding: '10px',
           borderRadius: '50%',
@@ -156,332 +154,384 @@ const Login = ({ onLoginSuccess }) => {
         )}
       </button>
 
-      {/* Decorative Orbs */}
-      <div style={{ position: 'absolute', top: '10%', right: '15%', width: '180px', height: '180px', background: 'var(--primary)', filter: 'blur(100px)', opacity: 0.1, borderRadius: '50%', zIndex: 0 }} />
-      <div style={{ position: 'absolute', bottom: '15%', left: '10%', width: '180px', height: '180px', background: 'var(--secondary)', filter: 'blur(100px)', opacity: 0.1, borderRadius: '50%', zIndex: 0 }} />
-
-      {/* STEP 1: INTRO/SPLASH SCREEN */}
-      {step === 'splash' && (
-        <div className="animate-fade-in" style={{
-          maxWidth: '780px',
-          width: '100%',
-          textAlign: 'center',
-          zIndex: 1,
-          padding: '20px'
-        }}>
-          <div style={{ marginBottom: '50px' }}>
+      {/* Main Split Layout Container */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'row',
+        width: '100%',
+        zIndex: 1
+      }}>
+        
+        {/* LEFT COLUMN: Editorial branding & console diagnostics */}
+        <div style={{
+          flex: '1.2',
+          background: 'rgba(10, 12, 22, 0.4)',
+          borderRight: '1px solid var(--border-glass)',
+          padding: '60px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          textAlign: 'left'
+        }} className="hidden-mobile">
+          <div>
             <div style={{
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '56px',
-              height: '56px',
-              borderRadius: '16px',
+              width: '48px',
+              height: '48px',
+              borderRadius: '12px',
               background: 'var(--primary-glow)',
-              border: '1px solid var(--border-glass)',
-              marginBottom: '20px',
-              color: 'var(--primary)'
+              border: '1px solid var(--border-bright)',
+              color: 'var(--primary)',
+              marginBottom: '40px'
             }}>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" /></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" /></svg>
             </div>
-            <h1 style={{ fontSize: '2.4rem', fontWeight: '900', letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-primary)' }}>
+            
+            <h1 style={{
+              fontSize: '3.5rem',
+              fontWeight: '900',
+              letterSpacing: '-0.05em',
+              lineHeight: '0.95',
+              color: 'var(--text-primary)',
+              marginBottom: '15px'
+            }}>
               Brahmagupta
             </h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', fontWeight: '500', letterSpacing: '0.03em', textTransform: 'uppercase' }}>
-              Attendance & Communications Console
+            <p style={{
+              fontSize: '0.75rem',
+              fontFamily: 'var(--font-mono)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.15em',
+              color: 'var(--primary)',
+              fontWeight: 'bold',
+              marginBottom: '30px'
+            }}>
+              Security & Check-in Control
             </p>
-          </div>
-
-          {/* Role selector cards */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
-            gap: '24px',
-            marginBottom: '40px'
-          }}>
-            {/* Staff Card */}
-            <div 
-              onClick={() => selectRole('staff')}
-              className="glass-card"
-              style={{
-                cursor: 'pointer',
-                textAlign: 'left',
-                border: '1px solid var(--border-glass)',
-                padding: '28px',
-                borderRadius: '20px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                minHeight: '180px',
-                transition: 'var(--transition-smooth)'
-              }}
-            >
-              <div>
-                <div style={{
-                  width: '42px',
-                  height: '42px',
-                  borderRadius: '10px',
-                  background: 'rgba(99,102,241,0.08)',
-                  color: 'var(--primary)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '20px'
-                }}>
-                  <StaffIcon size={20} />
-                </div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '6px' }}>Staff Portal</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>Access student directory, approve excuse logs, and record pings.</p>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '20px', color: 'var(--primary)', fontWeight: '700', fontSize: '0.8rem' }}>
-                <span>Secure Log-in</span>
-                <ArrowRightIcon size={12} />
-              </div>
-            </div>
-
-            {/* Parent Card */}
-            <div 
-              onClick={() => selectRole('parent')}
-              className="glass-card"
-              style={{
-                cursor: 'pointer',
-                textAlign: 'left',
-                border: '1px solid var(--border-glass)',
-                padding: '28px',
-                borderRadius: '20px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                minHeight: '180px',
-                transition: 'var(--transition-smooth)'
-              }}
-            >
-              <div>
-                <div style={{
-                  width: '42px',
-                  height: '42px',
-                  borderRadius: '10px',
-                  background: 'rgba(6,182,212,0.08)',
-                  color: 'rgba(6,182,212,1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '20px'
-                }}>
-                  <ParentIcon size={20} />
-                </div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '6px' }}>Parent Console</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>Track daily logs, view inbox notifications, request sick leaves, and settle dues.</p>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '20px', color: 'rgba(6,182,212,1)', fontWeight: '700', fontSize: '0.8rem' }}>
-                <span>Access Console</span>
-                <ArrowRightIcon size={12} />
-              </div>
-            </div>
-
-            {/* Student Card */}
-            <div 
-              onClick={() => selectRole('student')}
-              className="glass-card"
-              style={{
-                cursor: 'pointer',
-                textAlign: 'left',
-                border: '1px solid var(--border-glass)',
-                padding: '28px',
-                borderRadius: '20px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                minHeight: '180px',
-                transition: 'var(--transition-smooth)'
-              }}
-            >
-              <div>
-                <div style={{
-                  width: '42px',
-                  height: '42px',
-                  borderRadius: '10px',
-                  background: 'rgba(16,185,129,0.08)',
-                  color: 'rgba(16,185,129,1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginBottom: '20px'
-                }}>
-                  <StudentIcon size={20} />
-                </div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '6px' }}>Student Workspace</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>Verify scanned check-ins, read class circulars, and monitor grades.</p>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '20px', color: 'rgba(16,185,129,1)', fontWeight: '700', fontSize: '0.8rem' }}>
-                <span>Verify RFID</span>
-                <ArrowRightIcon size={12} />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* STEP 2: CREDENTIALS FORMS */}
-      {step === 'credentials' && (
-        <div className="animate-fade-in" style={{
-          maxWidth: '440px',
-          width: '100%',
-          zIndex: 1,
-          padding: '20px'
-        }}>
-          {/* Back button */}
-          <button
-            onClick={() => {
-              setStep('splash');
-              setError('');
-            }}
-            style={{
-              background: 'none',
-              border: 'none',
+            <p style={{
+              fontSize: '0.95rem',
               color: 'var(--text-secondary)',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginBottom: '25px',
-              padding: '8px 12px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '0.85rem',
-              fontWeight: '600'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
-            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
-          >
-            <ArrowLeftIcon size={16} />
-            <span>Switch Role</span>
-          </button>
-
-          <div className="glass-panel" style={{
-            padding: '36px',
-            border: '1px solid var(--border-glass)',
-            boxShadow: 'var(--shadow-glow)',
-            textAlign: 'left'
-          }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
-              {loginType === 'staff' ? 'Staff Authorization' : loginType === 'parent' ? 'Parent Verification' : 'Student Verification'}
-            </h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '28px' }}>
-              {loginType === 'staff' 
-                ? 'Enter email credentials to open administrative portal.' 
-                : loginType === 'parent' 
-                ? 'Enter your registered phone number to load child logs.' 
-                : 'Scan or enter your RFID card UID number.'}
+              lineHeight: '1.6',
+              maxWidth: '380px'
+            }}>
+              Bespoke local platform logging secure student verification checks and immediate parental notifications over RFID frequencies.
             </p>
+          </div>
 
-            {error && (
-              <div style={{
-                background: 'var(--danger-glow)',
-                border: '1px solid var(--danger)',
-                color: 'var(--danger)',
-                padding: '12px',
-                borderRadius: '8px',
-                fontSize: '0.85rem',
-                marginBottom: '20px',
-                fontWeight: '500',
-                lineHeight: '1.4'
-              }}>
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {/* STAFF LOG IN */}
-              {loginType === 'staff' && (
-                <>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Email address</label>
-                    <input 
-                      type="email" 
-                      placeholder="name@school.edu"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Password</label>
-                    <input 
-                      type="password" 
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* PARENT LOG IN */}
-              {loginType === 'parent' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Registered Mobile Number</label>
-                  <input 
-                    type="tel" 
-                    placeholder="+919656108992"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    required
-                  />
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                    <InfoIcon size={12} />
-                    <span>Include country code (e.g. +91)</span>
-                  </span>
-                </div>
-              )}
-
-              {/* STUDENT LOG IN */}
-              {loginType === 'student' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>RFID Card UID</label>
-                  <input 
-                    type="text" 
-                    placeholder="2461C901"
-                    value={rfidUid}
-                    onChange={(e) => setRfidUid(e.target.value)}
-                    required
-                  />
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                    <InfoIcon size={12} />
-                    <span>UID can be found on back of card</span>
-                  </span>
-                </div>
-              )}
-
-              <button 
-                type="submit" 
-                disabled={loading}
-                className="btn-primary" 
-                style={{
-                  width: '100%', 
-                  padding: '14px', 
-                  fontSize: '0.95rem',
-                  fontWeight: '700',
-                  marginTop: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px'
-                }}
-              >
-                {loading ? (
-                  <span>Authorizing...</span>
-                ) : (
-                  <>
-                    <span>Request Verification</span>
-                    <ArrowRightIcon size={14} />
-                  </>
-                )}
-              </button>
-            </form>
+          {/* Editorial tech metadata footer */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+            borderTop: '1px solid var(--border-glass)',
+            paddingTop: '25px',
+            maxWidth: '320px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span className="tech-label">System State</span>
+              <span className="tech-value" style={{ color: 'var(--success)', fontSize: '0.75rem' }}>ACTIVE</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span className="tech-label">Local Host</span>
+              <span className="tech-value" style={{ fontSize: '0.75rem' }}>192.168.1.17</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span className="tech-label">Gateway Engine</span>
+              <span className="tech-value" style={{ fontSize: '0.75rem' }}>Twilio Client</span>
+            </div>
           </div>
         </div>
-      )}
+
+        {/* RIGHT COLUMN: Interactive Login Morph Form */}
+        <div style={{
+          flex: '1',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '40px'
+        }}>
+          
+          {/* STEP 1: SPLASH CARDS ROLE SELECTOR */}
+          {step === 'splash' && (
+            <div className="animate-fade-in" style={{
+              maxWidth: '420px',
+              width: '100%',
+              textAlign: 'left'
+            }}>
+              <div style={{ marginBottom: '35px' }} className="visible-mobile-only">
+                <h1 style={{ fontSize: '2rem', fontWeight: '900', letterSpacing: '-0.04em', color: 'var(--text-primary)' }}>Brahmagupta</h1>
+                <span className="tech-label" style={{ color: 'var(--primary)' }}>Attendance Access</span>
+              </div>
+
+              <div style={{ marginBottom: '25px' }}>
+                <span className="tech-label">Select Workspace Role</span>
+                <h2 style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--text-primary)', marginTop: '6px', letterSpacing: '-0.03em' }}>Welcome back.</h2>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                {/* Staff Link */}
+                <div 
+                  onClick={() => selectRole('staff')}
+                  className="bento-border"
+                  style={{
+                    padding: '20px 24px',
+                    borderRadius: '16px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    transition: 'var(--transition-fast)'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--primary)'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-glass)'}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ color: 'var(--primary)' }}><StaffIcon size={18} /></div>
+                    <div>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' }}>Staff Workspace</h4>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>Directory, logs, database control</p>
+                    </div>
+                  </div>
+                  <ArrowRightIcon size={14} color="var(--text-muted)" />
+                </div>
+
+                {/* Parent Link */}
+                <div 
+                  onClick={() => selectRole('parent')}
+                  className="bento-border"
+                  style={{
+                    padding: '20px 24px',
+                    borderRadius: '16px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    transition: 'var(--transition-fast)'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.5)'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-glass)'}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ color: 'rgba(6, 182, 212, 1)' }}><ParentIcon size={18} /></div>
+                    <div>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' }}>Parent Portal</h4>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>Check-in reports, tuition dues, inbox alerts</p>
+                    </div>
+                  </div>
+                  <ArrowRightIcon size={14} color="var(--text-muted)" />
+                </div>
+
+                {/* Student Link */}
+                <div 
+                  onClick={() => selectRole('student')}
+                  className="bento-border"
+                  style={{
+                    padding: '20px 24px',
+                    borderRadius: '16px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    transition: 'var(--transition-fast)'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(16, 185, 129, 0.5)'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border-glass)'}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ color: 'rgba(16, 185, 129, 1)' }}><StudentIcon size={18} /></div>
+                    <div>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: '700', color: 'var(--text-primary)' }}>Student Workspace</h4>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>Personal grades, check-in log records</p>
+                    </div>
+                  </div>
+                  <ArrowRightIcon size={14} color="var(--text-muted)" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2: DETAILS VERIFICATION FORM */}
+          {step === 'credentials' && (
+            <div className="animate-fade-in" style={{
+              maxWidth: '380px',
+              width: '100%',
+              textAlign: 'left'
+            }}>
+              {/* Back switcher */}
+              <button
+                onClick={() => {
+                  setStep('splash');
+                  setError('');
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginBottom: '25px',
+                  padding: '8px 0',
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  fontWeight: '600'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
+              >
+                <ArrowLeftIcon size={14} />
+                <span>Return to workspaces</span>
+              </button>
+
+              <div className="bento-border" style={{
+                padding: '30px',
+                borderRadius: '20px'
+              }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '4px', letterSpacing: '-0.02em' }}>
+                  {loginType === 'staff' ? 'Staff Login' : loginType === 'parent' ? 'Parent Verification' : 'Student Verification'}
+                </h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '24px' }}>
+                  {loginType === 'staff' 
+                    ? 'Use verified credentials to open school registry.' 
+                    : loginType === 'parent' 
+                    ? 'Enter registered parent phone to load student workspaces.' 
+                    : 'Input card serial RFID number.'}
+                </p>
+
+                {error && (
+                  <div style={{
+                    background: 'var(--danger-glow)',
+                    border: '1px solid var(--danger)',
+                    color: 'var(--danger)',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    fontSize: '0.75rem',
+                    marginBottom: '20px',
+                    fontWeight: '600',
+                    lineHeight: '1.4'
+                  }}>
+                    {error}
+                  </div>
+                )}
+
+                <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {/* STAFF INPUT */}
+                  {loginType === 'staff' && (
+                    <>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <span className="tech-label">Email address</span>
+                        <input 
+                          type="email" 
+                          placeholder="name@school.edu"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          style={{
+                            background: 'rgba(255,255,255,0.02)',
+                            border: '1px solid var(--border-glass)',
+                            borderRadius: '10px'
+                          }}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <span className="tech-label">Password</span>
+                        <input 
+                          type="password" 
+                          placeholder="••••••••"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                          style={{
+                            background: 'rgba(255,255,255,0.02)',
+                            border: '1px solid var(--border-glass)',
+                            borderRadius: '10px'
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* PARENT INPUT */}
+                  {loginType === 'parent' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <span className="tech-label">Mobile Number</span>
+                      <input 
+                        type="tel" 
+                        placeholder="+919656108992"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        required
+                        style={{
+                          background: 'rgba(255,255,255,0.02)',
+                          border: '1px solid var(--border-glass)',
+                          borderRadius: '10px'
+                        }}
+                      />
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                        <InfoIcon size={12} />
+                        <span>Include country calling code (+91)</span>
+                      </span>
+                    </div>
+                  )}
+
+                  {/* STUDENT INPUT */}
+                  {loginType === 'student' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <span className="tech-label">RFID Card UID</span>
+                      <input 
+                        type="text" 
+                        placeholder="2461C901"
+                        value={rfidUid}
+                        onChange={(e) => setRfidUid(e.target.value)}
+                        required
+                        style={{
+                          background: 'rgba(255,255,255,0.02)',
+                          border: '1px solid var(--border-glass)',
+                          borderRadius: '10px'
+                        }}
+                      />
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                        <InfoIcon size={12} />
+                        <span>Input serial string found on card back</span>
+                      </span>
+                    </div>
+                  )}
+
+                  <button 
+                    type="submit" 
+                    disabled={loading}
+                    className="btn-primary" 
+                    style={{
+                      width: '100%', 
+                      padding: '12px', 
+                      fontSize: '0.85rem',
+                      fontWeight: '700',
+                      marginTop: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      borderRadius: '10px'
+                    }}
+                  >
+                    {loading ? (
+                      <span>Validating Session...</span>
+                    ) : (
+                      <>
+                        <span>Open Workspace</span>
+                        <ArrowRightIcon size={12} />
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
     </div>
   );
 };
