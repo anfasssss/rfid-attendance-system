@@ -91,7 +91,6 @@ const ParentPortal = ({ role = 'parent', parentPhone = '', studentRfid = '', onL
       if (!res.ok) throw new Error('Failed to connect to local server.');
       const data = await res.json();
       
-      // Handle the new response shape: { students, notifications }
       const fetchedStudents = data.students || [];
       const fetchedNotifications = data.notifications || [];
 
@@ -198,7 +197,7 @@ const ParentPortal = ({ role = 'parent', parentPhone = '', studentRfid = '', onL
     }
   };
 
-  // Loading Splash Screen
+  // Loading Screen
   if (!isLoggedIn) {
     return (
       <div style={{
@@ -243,8 +242,8 @@ const ParentPortal = ({ role = 'parent', parentPhone = '', studentRfid = '', onL
   // Calculate student attendance rate
   const totalLogs = activeStudent?.logs?.length || 0;
   const attendanceRate = Math.min(100, Math.max(0, Math.round((totalLogs / 30) * 100)));
-  const totalLeaves = activeStudent?.leaves?.filter(l => l.status === 'Approved').length || 0;
-  const totalAbsences = Math.max(0, 30 - totalLogs - totalLeaves);
+  const totalLeavesApproved = activeStudent?.leaves?.filter(l => l.status === 'Approved').length || 0;
+  const totalAbsences = Math.max(0, 30 - totalLogs - totalLeavesApproved);
 
   // Calculate payments
   const totalPaid = activeStudent?.payments?.reduce((sum, p) => sum + p.amount, 0) || 0;
@@ -253,7 +252,7 @@ const ParentPortal = ({ role = 'parent', parentPhone = '', studentRfid = '', onL
 
   return (
     <div style={{
-      maxWidth: '520px',
+      maxWidth: '640px',
       margin: '0 auto',
       padding: '20px 20px 100px 20px',
       minHeight: '100vh',
@@ -361,115 +360,134 @@ const ParentPortal = ({ role = 'parent', parentPhone = '', studentRfid = '', onL
         </div>
       )}
 
-      {/* Active Child Hero Card */}
-      {activeStudent && (
-        <div className="glass-panel animate-fade-in" style={{
-          padding: '24px',
-          marginBottom: '25px',
-          border: '1px solid var(--border-glass)',
-          boxShadow: 'var(--shadow-glow)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px'
-        }}>
-          <img 
-            src={activeStudent.imageUrl || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(activeStudent.name)}`}
-            alt={activeStudent.name}
-            style={{
-              width: '60px',
-              height: '60px',
-              borderRadius: '50%',
-              objectFit: 'cover',
-              border: '2px solid var(--primary)',
-              boxShadow: '0 0 10px rgba(99, 102, 241, 0.15)'
-            }}
-          />
-          <div style={{ textAlign: 'left' }}>
-            <h2 style={{ fontSize: '1.35rem', color: 'var(--text-primary)', fontWeight: '800', marginBottom: '2px' }}>
-              {activeStudent.name}
-            </h2>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '6px' }}>
-              <span style={{ fontSize: '0.75rem', background: 'rgba(99,102,241,0.08)', color: 'var(--primary)', padding: '2px 8px', borderRadius: '12px', fontWeight: '600' }}>
-                {activeStudent.grade}
-              </span>
-              <span style={{ height: '10px', width: '1px', background: 'var(--border-glass)' }} />
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                {activeStudent.rfidUid}
-              </span>
-            </div>
-            
-            {/* ENROLLED/ADDED TIMELINE TAG - View when children are added */}
-            {activeStudent.createdAt && (
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'var(--bg-hover)', padding: '3px 8px', borderRadius: '6px', border: '1px solid var(--border-glass)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ width: '4px', height: '4px', background: 'var(--success)', borderRadius: '50%' }} />
-                Enrolled: {new Date(activeStudent.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* PORTAL MAIN TAB BODY CONTAINER */}
       {activeStudent && (
         <div style={{ minHeight: '300px' }}>
           
-          {/* TAB 1: HOME SUBTAB */}
+          {/* TAB 1: ASYMMETRICAL BENTO GRID WORKSPACE */}
           {activeSubTab === 'home' && (
-            <div className="animate-float-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {/* Check-in Status Card */}
-              <div className="glass-panel" style={{ padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--border-glass)' }}>
+            <div className="animate-float-up" style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(12, 1fr)',
+              gap: '20px'
+            }}>
+              {/* Bento Box 1: Profile & Enrollment (Span 12 on mobile, 8 on tablet) */}
+              <div className="glass-panel" style={{
+                gridColumn: 'span 12',
+                padding: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '20px',
+                border: '1px solid var(--border-glass)'
+              }}>
+                <img 
+                  src={activeStudent.imageUrl || `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(activeStudent.name)}`}
+                  alt={activeStudent.name}
+                  style={{
+                    width: '72px',
+                    height: '72px',
+                    borderRadius: '20px',
+                    objectFit: 'cover',
+                    border: '2px solid var(--primary)',
+                    boxShadow: 'var(--shadow-neon)'
+                  }}
+                />
                 <div style={{ textAlign: 'left' }}>
-                  <h4 style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '6px', fontWeight: '600' }}>Status Today</h4>
-                  <p style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-primary)' }}>
-                    {activeStudent.logs.some(l => l.dateStr === new Date().toISOString().split('T')[0]) ? (
-                      activeStudent.logs.find(l => l.dateStr === new Date().toISOString().split('T')[0])?.type === 'exit' ? (
-                        <span style={{ color: 'var(--accent)' }}>Checked Out (Exit)</span>
-                      ) : (
-                        <span style={{ color: 'var(--success)' }}>Checked In (Present)</span>
-                      )
-                    ) : activeStudent.leaves.some(l => l.dateStr === new Date().toISOString().split('T')[0] && l.status === 'Approved') ? (
-                      <span style={{ color: 'var(--warning)' }}>Excused Absence</span>
-                    ) : (
-                      <span style={{ color: 'var(--danger)' }}>Absent (No Scan logs)</span>
-                    )}
-                  </p>
-                </div>
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: activeStudent.logs.some(l => l.dateStr === new Date().toISOString().split('T')[0]) ? 'var(--success-glow)' : 'var(--danger-glow)',
-                  color: activeStudent.logs.some(l => l.dateStr === new Date().toISOString().split('T')[0]) ? 'var(--success)' : 'var(--danger)'
-                }}>
-                  {activeStudent.logs.some(l => l.dateStr === new Date().toISOString().split('T')[0]) ? (
-                    <CheckIcon size={20} />
-                  ) : (
-                    <InfoIcon size={20} />
+                  <h2 style={{ fontSize: '1.45rem', color: 'var(--text-primary)', fontWeight: '800', marginBottom: '4px' }}>
+                    {activeStudent.name}
+                  </h2>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '0.75rem', background: 'rgba(99,102,241,0.08)', color: 'var(--primary)', padding: '2px 8px', borderRadius: '12px', fontWeight: '600' }}>
+                      {activeStudent.grade}
+                    </span>
+                    <span style={{ height: '10px', width: '1px', background: 'var(--border-glass)' }} />
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                      {activeStudent.rfidUid}
+                    </span>
+                  </div>
+                  {activeStudent.createdAt && (
+                    <span style={{
+                      fontSize: '0.75rem',
+                      color: 'var(--text-muted)',
+                      background: 'var(--bg-hover)',
+                      padding: '3px 8px',
+                      borderRadius: '6px',
+                      border: '1px solid var(--border-glass)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      <span style={{ width: '4px', height: '4px', background: 'var(--success)', borderRadius: '50%' }} />
+                      Enrolled: {new Date(activeStudent.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </span>
                   )}
                 </div>
               </div>
 
-              {/* Circular Attendance Gauge Card */}
-              <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', border: '1px solid var(--border-glass)' }}>
-                <h4 style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '20px', fontWeight: '600' }}>Attendance rate (Last 30 Days)</h4>
-                
-                <div style={{ position: 'relative', width: '130px', height: '130px', marginBottom: '15px' }}>
-                  <svg height="130" width="130" style={{ transform: 'rotate(-90deg)' }}>
-                    <circle cx="65" cy="65" r="50" stroke="var(--border-glass)" strokeWidth="8" fill="transparent" />
+              {/* Bento Box 2: Attendance Status (Span 6) */}
+              <div className="glass-panel" style={{
+                gridColumn: 'span 6',
+                padding: '20px',
+                border: '1px solid var(--border-glass)',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                textAlign: 'left'
+              }}>
+                <div>
+                  <h4 style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '8px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status Today</h4>
+                  <p style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-primary)', lineHeight: '1.3' }}>
+                    {activeStudent.logs.some(l => l.dateStr === new Date().toISOString().split('T')[0]) ? (
+                      activeStudent.logs.find(l => l.dateStr === new Date().toISOString().split('T')[0])?.type === 'exit' ? (
+                        <span style={{ color: 'var(--accent)' }}>Checked Out</span>
+                      ) : (
+                        <span style={{ color: 'var(--success)' }}>Present in Class</span>
+                      )
+                    ) : activeStudent.leaves.some(l => l.dateStr === new Date().toISOString().split('T')[0] && l.status === 'Approved') ? (
+                      <span style={{ color: 'var(--warning)' }}>Excused Leave</span>
+                    ) : (
+                      <span style={{ color: 'var(--danger)' }}>Absent</span>
+                    )}
+                  </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '15px' }}>
+                  <span style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: activeStudent.logs.some(l => l.dateStr === new Date().toISOString().split('T')[0]) ? 'var(--success)' : 'var(--danger)',
+                    boxShadow: activeStudent.logs.some(l => l.dateStr === new Date().toISOString().split('T')[0]) ? '0 0 8px var(--success)' : '0 0 8px var(--danger)'
+                  }} />
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                    {activeStudent.logs.some(l => l.dateStr === new Date().toISOString().split('T')[0]) ? 'Hardware ping active' : 'No hardware scan today'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Bento Box 3: Attendance Gauge (Span 6) */}
+              <div className="glass-panel" style={{
+                gridColumn: 'span 6',
+                padding: '20px',
+                border: '1px solid var(--border-glass)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center'
+              }}>
+                <div style={{ position: 'relative', width: '90px', height: '90px' }}>
+                  <svg height="90" width="90" style={{ transform: 'rotate(-90deg)' }}>
+                    <circle cx="45" cy="45" r="36" stroke="var(--border-glass)" strokeWidth="6" fill="transparent" />
                     <circle 
-                      cx="65" 
-                      cy="65" 
-                      r="50" 
+                      cx="45" 
+                      cy="45" 
+                      r="36" 
                       stroke="var(--primary)" 
-                      strokeWidth="8" 
+                      strokeWidth="6" 
                       fill="transparent" 
-                      strokeDasharray={`${2 * Math.PI * 50}`}
-                      strokeDashoffset={`${2 * Math.PI * 50 * (1 - attendanceRate / 100)}`}
+                      strokeDasharray={`${2 * Math.PI * 36}`}
+                      strokeDashoffset={`${2 * Math.PI * 36 * (1 - attendanceRate / 100)}`}
                       strokeLinecap="round"
-                      style={{ transition: 'stroke-dashoffset 1s ease-in-out' }}
                     />
                   </svg>
                   <div style={{
@@ -477,25 +495,85 @@ const ParentPortal = ({ role = 'parent', parentPhone = '', studentRfid = '', onL
                     top: '50%',
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
-                    fontSize: '1.6rem',
+                    fontSize: '1.25rem',
                     fontWeight: '800',
                     color: 'var(--text-primary)'
                   }}>
                     {attendanceRate}%
                   </div>
                 </div>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  Total days logged present: {totalLogs}
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '10px' }}>
+                  Attendance Score
                 </span>
+              </div>
+
+              {/* Bento Box 4: Remaining Fees Summary (Span 12 on mobile, 6 on tablet) */}
+              <div className="glass-panel" style={{
+                gridColumn: 'span 12',
+                padding: '24px',
+                border: '1px solid var(--border-glass)',
+                textAlign: 'left',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between'
+              }}>
+                <div>
+                  <h4 style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Tuition Balance</h4>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <h2 style={{ fontSize: '1.8rem', color: remainingFees > 0 ? 'var(--warning)' : 'var(--success)', fontWeight: '900' }}>
+                      ₹{remainingFees.toLocaleString()}
+                    </h2>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      of ₹{totalFeesDue.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+
+                {role === 'parent' && remainingFees > 0 && (
+                  <button 
+                    onClick={() => setShowPayModal(true)} 
+                    className="btn-primary" 
+                    style={{ padding: '10px 16px', borderRadius: '10px', fontSize: '0.85rem', display: 'inline-flex', alignItems: 'center', gap: '8px', marginTop: '15px', alignSelf: 'flex-start' }}
+                  >
+                    <FeesIcon size={14} />
+                    <span>Pay Tuition</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Bento Box 5: Academic Report card snapshot */}
+              <div className="glass-panel" style={{
+                gridColumn: 'span 12',
+                padding: '20px',
+                border: '1px solid var(--border-glass)',
+                textAlign: 'left'
+              }}>
+                <h4 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '15px' }}>Grades Overview</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {(activeStudent.marks || []).slice(0, 3).map((m, idx) => (
+                    <div key={idx} style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '8px 12px',
+                      background: 'rgba(255,255,255,0.01)',
+                      border: '1px solid var(--border-glass)',
+                      borderRadius: '8px'
+                    }}>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-primary)', fontWeight: '600' }}>{m.subject}</span>
+                      <span style={{ fontSize: '0.85rem', color: m.grade.includes('A') ? 'var(--success)' : 'var(--primary)', fontWeight: '700' }}>{m.grade}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
 
-          {/* TAB 2: LOGS & HEATMAP - ATTENDANCE REPORT */}
+          {/* TAB 2: DETAILED ATTENDANCE REPORT & HEATMAP */}
           {activeSubTab === 'logs' && (
             <div className="animate-float-up" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               
-              {/* Detailed Monthly Stats Card - "Attendance Report" details */}
+              {/* Detailed Monthly Stats Card */}
               <div className="glass-panel" style={{ padding: '20px', border: '1px solid var(--border-glass)', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', textAlign: 'center' }}>
                 <div>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Present Days</span>
@@ -503,7 +581,7 @@ const ParentPortal = ({ role = 'parent', parentPhone = '', studentRfid = '', onL
                 </div>
                 <div style={{ borderLeft: '1px solid var(--border-glass)', borderRight: '1px solid var(--border-glass)' }}>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Leaves Excused</span>
-                  <p style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--primary)', marginTop: '4px' }}>{totalLeaves}</p>
+                  <p style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--primary)', marginTop: '4px' }}>{totalLeavesApproved}</p>
                 </div>
                 <div>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Absences</span>
@@ -624,7 +702,6 @@ const ParentPortal = ({ role = 'parent', parentPhone = '', studentRfid = '', onL
                   </div>
                 </div>
 
-                {/* Hide Pay button for Student Role */}
                 {role === 'parent' && remainingFees > 0 && (
                   <button 
                     onClick={() => setShowPayModal(true)} 
@@ -690,7 +767,6 @@ const ParentPortal = ({ role = 'parent', parentPhone = '', studentRfid = '', onL
                     {role === 'student' ? 'Leave requests submitted by parent logs.' : 'Submit leave requests directly to class teacher.'}
                   </p>
                 </div>
-                {/* Hide Request Leave button for Student Role */}
                 {role === 'parent' && (
                   <button 
                     onClick={() => setShowLeaveModal(true)} 

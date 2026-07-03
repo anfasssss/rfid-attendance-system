@@ -60,7 +60,6 @@ const Login = ({ onLoginSuccess }) => {
           setLoading(false);
         }
       } else {
-        // In local API mode, any input works for testing!
         setTimeout(() => {
           onLoginSuccess({
             email: email || 'teacher@school.edu',
@@ -76,7 +75,10 @@ const Login = ({ onLoginSuccess }) => {
         const res = await fetch(`${API_BASE_URL}/parents/students?phone=${encodeURIComponent(phone)}`);
         if (!res.ok) throw new Error('Verification request failed.');
         const data = await res.json();
-        if (data.length === 0) {
+        
+        // Match the object response shape { students, notifications }
+        const students = data.students || [];
+        if (students.length === 0) {
           throw new Error('No students found linked to this phone number.');
         }
         onLoginSuccess({ role: 'parent', phone: phone });
@@ -112,13 +114,13 @@ const Login = ({ onLoginSuccess }) => {
       position: 'relative',
       overflow: 'hidden'
     }}>
-      {/* Decorative background grid elements for a highly professional feel */}
+      {/* Decorative background grid overlay */}
       <div style={{
         position: 'absolute',
         top: 0, left: 0, right: 0, bottom: 0,
         backgroundImage: 'radial-gradient(var(--border-glass) 1.5px, transparent 1.5px)',
-        backgroundSize: '32px 32px',
-        opacity: 0.25,
+        backgroundSize: '24px 24px',
+        opacity: 0.15,
         pointerEvents: 'none',
         zIndex: 0
       }} />
@@ -155,38 +157,38 @@ const Login = ({ onLoginSuccess }) => {
       </button>
 
       {/* Decorative Orbs */}
-      <div style={{ position: 'absolute', top: '10%', right: '15%', width: '150px', height: '150px', background: 'var(--primary)', filter: 'blur(100px)', opacity: 0.15, borderRadius: '50%', zIndex: 0 }} />
-      <div style={{ position: 'absolute', bottom: '15%', left: '10%', width: '150px', height: '150px', background: 'var(--secondary)', filter: 'blur(100px)', opacity: 0.15, borderRadius: '50%', zIndex: 0 }} />
+      <div style={{ position: 'absolute', top: '10%', right: '15%', width: '180px', height: '180px', background: 'var(--primary)', filter: 'blur(100px)', opacity: 0.1, borderRadius: '50%', zIndex: 0 }} />
+      <div style={{ position: 'absolute', bottom: '15%', left: '10%', width: '180px', height: '180px', background: 'var(--secondary)', filter: 'blur(100px)', opacity: 0.1, borderRadius: '50%', zIndex: 0 }} />
 
       {/* STEP 1: INTRO/SPLASH SCREEN */}
       {step === 'splash' && (
         <div className="animate-fade-in" style={{
-          maxWidth: '800px',
+          maxWidth: '780px',
           width: '100%',
           textAlign: 'center',
           zIndex: 1,
           padding: '20px'
         }}>
-          <div style={{ marginBottom: '45px' }}>
+          <div style={{ marginBottom: '50px' }}>
             <div style={{
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '60px',
-              height: '60px',
+              width: '56px',
+              height: '56px',
               borderRadius: '16px',
               background: 'var(--primary-glow)',
               border: '1px solid var(--border-glass)',
               marginBottom: '20px',
               color: 'var(--primary)'
             }}>
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" /></svg>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" /></svg>
             </div>
-            <h1 className="shimmer-text" style={{ fontSize: '2.5rem', fontWeight: '800', letterSpacing: '-0.03em', marginBottom: '8px' }}>
-              Brahmagupta Academy
+            <h1 style={{ fontSize: '2.4rem', fontWeight: '900', letterSpacing: '-0.04em', marginBottom: '8px', color: 'var(--text-primary)' }}>
+              Brahmagupta
             </h1>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem', fontWeight: '500' }}>
-              RFID Student Attendance Portal & Management Control Center
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', fontWeight: '500', letterSpacing: '0.03em', textTransform: 'uppercase' }}>
+              Attendance & Communications Console
             </p>
           </div>
 
@@ -200,204 +202,176 @@ const Login = ({ onLoginSuccess }) => {
             {/* Staff Card */}
             <div 
               onClick={() => selectRole('staff')}
-              className="glass-panel"
+              className="glass-card"
               style={{
-                padding: '35px 25px',
                 cursor: 'pointer',
-                transition: 'var(--transition-spring)',
+                textAlign: 'left',
                 border: '1px solid var(--border-glass)',
+                padding: '28px',
+                borderRadius: '20px',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-6px)';
-                e.currentTarget.style.borderColor = 'var(--primary)';
-                e.currentTarget.style.boxShadow = 'var(--shadow-neon)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.borderColor = 'var(--border-glass)';
-                e.currentTarget.style.boxShadow = 'none';
+                justifyContent: 'space-between',
+                minHeight: '180px',
+                transition: 'var(--transition-smooth)'
               }}
             >
-              <div style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '50%',
-                background: 'rgba(99, 102, 241, 0.08)',
-                color: 'var(--primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '20px'
-              }}>
-                <StaffIcon size={26} strokeWidth={2.2} />
+              <div>
+                <div style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '10px',
+                  background: 'rgba(99,102,241,0.08)',
+                  color: 'var(--primary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '20px'
+                }}>
+                  <StaffIcon size={20} />
+                </div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '6px' }}>Staff Portal</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>Access student directory, approve excuse logs, and record pings.</p>
               </div>
-              <h3 style={{ fontSize: '1.2rem', marginBottom: '8px', color: 'var(--text-primary)', fontWeight: '700' }}>Staff Portal</h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                Access live scan timelines, student directory registry, and excused leave logs.
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '20px', color: 'var(--primary)', fontWeight: '700', fontSize: '0.8rem' }}>
+                <span>Secure Log-in</span>
+                <ArrowRightIcon size={12} />
+              </div>
             </div>
 
             {/* Parent Card */}
             <div 
               onClick={() => selectRole('parent')}
-              className="glass-panel"
+              className="glass-card"
               style={{
-                padding: '35px 25px',
                 cursor: 'pointer',
-                transition: 'var(--transition-spring)',
+                textAlign: 'left',
                 border: '1px solid var(--border-glass)',
+                padding: '28px',
+                borderRadius: '20px',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-6px)';
-                e.currentTarget.style.borderColor = 'var(--primary)';
-                e.currentTarget.style.boxShadow = 'var(--shadow-neon)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.borderColor = 'var(--border-glass)';
-                e.currentTarget.style.boxShadow = 'none';
+                justifyContent: 'space-between',
+                minHeight: '180px',
+                transition: 'var(--transition-smooth)'
               }}
             >
-              <div style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '50%',
-                background: 'rgba(99, 102, 241, 0.08)',
-                color: 'var(--primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '20px'
-              }}>
-                <ParentIcon size={26} strokeWidth={2.2} />
+              <div>
+                <div style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '10px',
+                  background: 'rgba(6,182,212,0.08)',
+                  color: 'rgba(6,182,212,1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '20px'
+                }}>
+                  <ParentIcon size={20} />
+                </div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '6px' }}>Parent Console</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>Track daily logs, view inbox notifications, request sick leaves, and settle dues.</p>
               </div>
-              <h3 style={{ fontSize: '1.2rem', marginBottom: '8px', color: 'var(--text-primary)', fontWeight: '700' }}>Parent Portal</h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                Submit excuse sick leaves, check remaining tuition balances, and track check-ins.
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '20px', color: 'rgba(6,182,212,1)', fontWeight: '700', fontSize: '0.8rem' }}>
+                <span>Access Console</span>
+                <ArrowRightIcon size={12} />
+              </div>
             </div>
 
             {/* Student Card */}
             <div 
               onClick={() => selectRole('student')}
-              className="glass-panel"
+              className="glass-card"
               style={{
-                padding: '35px 25px',
                 cursor: 'pointer',
-                transition: 'var(--transition-spring)',
+                textAlign: 'left',
                 border: '1px solid var(--border-glass)',
+                padding: '28px',
+                borderRadius: '20px',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-6px)';
-                e.currentTarget.style.borderColor = 'var(--primary)';
-                e.currentTarget.style.boxShadow = 'var(--shadow-neon)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.borderColor = 'var(--border-glass)';
-                e.currentTarget.style.boxShadow = 'none';
+                justifyContent: 'space-between',
+                minHeight: '180px',
+                transition: 'var(--transition-smooth)'
               }}
             >
-              <div style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '50%',
-                background: 'rgba(99, 102, 241, 0.08)',
-                color: 'var(--primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '20px'
-              }}>
-                <StudentIcon size={26} strokeWidth={2.2} />
+              <div>
+                <div style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '10px',
+                  background: 'rgba(16,185,129,0.08)',
+                  color: 'rgba(16,185,129,1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '20px'
+                }}>
+                  <StudentIcon size={20} />
+                </div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '6px' }}>Student Workspace</h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>Verify scanned check-ins, read class circulars, and monitor grades.</p>
               </div>
-              <h3 style={{ fontSize: '1.2rem', marginBottom: '8px', color: 'var(--text-primary)', fontWeight: '700' }}>Student Portal</h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                Verify your daily check-in status, view attendance heatmaps, and download exam marks.
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '20px', color: 'rgba(16,185,129,1)', fontWeight: '700', fontSize: '0.8rem' }}>
+                <span>Verify RFID</span>
+                <ArrowRightIcon size={12} />
+              </div>
             </div>
           </div>
-
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            Authorized access only. Secure server connected.
-          </span>
         </div>
       )}
 
-      {/* STEP 2: CREDENTIAL ENTRY SCREEN */}
+      {/* STEP 2: CREDENTIALS FORMS */}
       {step === 'credentials' && (
-        <div className="animate-float-up" style={{
-          maxWidth: '420px',
+        <div className="animate-fade-in" style={{
+          maxWidth: '440px',
           width: '100%',
-          zIndex: 1
+          zIndex: 1,
+          padding: '20px'
         }}>
           {/* Back button */}
-          <button 
-            onClick={() => setStep('splash')}
+          <button
+            onClick={() => {
+              setStep('splash');
+              setError('');
+            }}
             style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--text-secondary)',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-muted)',
-              fontSize: '0.85rem',
-              fontWeight: '600',
+              marginBottom: '25px',
+              padding: '8px 12px',
+              borderRadius: '8px',
               cursor: 'pointer',
-              marginBottom: '20px',
-              padding: '4px 0',
-              transition: 'var(--transition-fast)'
+              fontSize: '0.85rem',
+              fontWeight: '600'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
-            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
+            onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
           >
-            <ArrowLeftIcon size={16} /> Back to portals
+            <ArrowLeftIcon size={16} />
+            <span>Switch Role</span>
           </button>
 
           <div className="glass-panel" style={{
-            padding: '40px',
+            padding: '36px',
             border: '1px solid var(--border-glass)',
-            boxShadow: 'var(--shadow-card)',
-            position: 'relative'
+            boxShadow: 'var(--shadow-glow)',
+            textAlign: 'left'
           }}>
-            {/* Floating indicator */}
-            <div style={{
-              position: 'absolute',
-              top: '40px',
-              right: '40px',
-              color: 'var(--primary)',
-              opacity: 0.15
-            }}>
-              {loginType === 'staff' ? (
-                <StaffIcon size={40} />
-              ) : loginType === 'parent' ? (
-                <ParentIcon size={40} />
-              ) : (
-                <StudentIcon size={40} />
-              )}
-            </div>
-
-            <h2 style={{ fontSize: '1.6rem', color: 'var(--text-primary)', fontWeight: '800', marginBottom: '8px', textAlign: 'left' }}>
-              {loginType === 'staff' ? 'Instructor Login' : loginType === 'parent' ? 'Parent Verification' : 'Student Verification'}
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-primary)', marginBottom: '8px' }}>
+              {loginType === 'staff' ? 'Staff Authorization' : loginType === 'parent' ? 'Parent Verification' : 'Student Verification'}
             </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '30px', textAlign: 'left', lineHeight: '1.4' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '28px' }}>
               {loginType === 'staff' 
-                ? 'Enter your school credentials to access the teacher management panel.' 
+                ? 'Enter email credentials to open administrative portal.' 
                 : loginType === 'parent' 
-                ? 'Enter your registered phone number to verify and check your kids.'
-                : 'Enter your registered student RFID Card UID to verify and view reports.'}
+                ? 'Enter your registered phone number to load child logs.' 
+                : 'Scan or enter your RFID card UID number.'}
             </p>
 
             {error && (
@@ -409,57 +383,31 @@ const Login = ({ onLoginSuccess }) => {
                 borderRadius: '8px',
                 fontSize: '0.85rem',
                 marginBottom: '20px',
-                textAlign: 'left',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                fontWeight: '500'
+                fontWeight: '500',
+                lineHeight: '1.4'
               }}>
-                <InfoIcon size={16} color="var(--danger)" />
-                <span>{error}</span>
+                {error}
               </div>
             )}
 
-            {/* Helper notes for Guest Mode */}
-            {loginType === 'staff' && !isFirebaseActive && (
-              <div style={{
-                background: 'var(--secondary-glow)',
-                border: '1px solid rgba(6, 182, 212, 0.15)',
-                color: 'var(--secondary)',
-                padding: '10px 14px',
-                borderRadius: '8px',
-                fontSize: '0.8rem',
-                marginBottom: '20px',
-                textAlign: 'left',
-                lineHeight: '1.4',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '8px'
-              }}>
-                <InfoIcon size={16} color="var(--secondary)" style={{ marginTop: '2px' }} />
-                <span>Running in Offline Dev Mode. Any email/password will authenticate.</span>
-              </div>
-            )}
-
-            <form onSubmit={handleLogin} style={{ textAlign: 'left' }}>
-              
-              {/* STAFF INPUTS */}
+            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {/* STAFF LOG IN */}
               {loginType === 'staff' && (
                 <>
-                  <div style={{ marginBottom: '20px' }}>
-                    <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '600' }}>Email Address</label>
-                    <input
-                      type="email"
-                      placeholder="teacher@school.edu"
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Email address</label>
+                    <input 
+                      type="email" 
+                      placeholder="name@school.edu"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
                     />
                   </div>
-                  <div style={{ marginBottom: '30px' }}>
-                    <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '600' }}>Password</label>
-                    <input
-                      type="password"
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Password</label>
+                    <input 
+                      type="password" 
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -469,59 +417,66 @@ const Login = ({ onLoginSuccess }) => {
                 </>
               )}
 
-              {/* PARENT INPUT */}
+              {/* PARENT LOG IN */}
               {loginType === 'parent' && (
-                <div style={{ marginBottom: '30px' }}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '600' }}>WhatsApp Phone Number</label>
-                  <input
-                    type="text"
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>Registered Mobile Number</label>
+                  <input 
+                    type="tel" 
                     placeholder="+919656108992"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     required
                   />
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginTop: '6px' }}>
-                    Provide full country prefix (e.g. +91) linked to student registers.
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                    <InfoIcon size={12} />
+                    <span>Include country code (e.g. +91)</span>
                   </span>
                 </div>
               )}
 
-              {/* STUDENT INPUT */}
+              {/* STUDENT LOG IN */}
               {loginType === 'student' && (
-                <div style={{ marginBottom: '30px' }}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '600' }}>RFID Card UID</label>
-                  <input
-                    type="text"
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <label style={{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-secondary)' }}>RFID Card UID</label>
+                  <input 
+                    type="text" 
                     placeholder="2461C901"
                     value={rfidUid}
                     onChange={(e) => setRfidUid(e.target.value)}
                     required
-                    style={{ fontFamily: 'var(--font-mono)' }}
                   />
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginTop: '6px' }}>
-                    Enter the alpha-numeric card signature key (e.g. 2461C901).
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                    <InfoIcon size={12} />
+                    <span>UID can be found on back of card</span>
                   </span>
                 </div>
               )}
 
-              <button
-                type="submit"
-                className="btn-primary"
+              <button 
+                type="submit" 
                 disabled={loading}
+                className="btn-primary" 
                 style={{
-                  width: '100%',
-                  padding: '14px',
-                  fontWeight: '700',
+                  width: '100%', 
+                  padding: '14px', 
                   fontSize: '0.95rem',
-                  borderRadius: '10px',
-                  display: 'inline-flex',
+                  fontWeight: '700',
+                  marginTop: '10px',
+                  display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px'
                 }}
               >
-                <span>{loading ? 'Authenticating...' : 'Secure Authorization'}</span>
-                {!loading && <ArrowRightIcon size={16} />}
+                {loading ? (
+                  <span>Authorizing...</span>
+                ) : (
+                  <>
+                    <span>Request Verification</span>
+                    <ArrowRightIcon size={14} />
+                  </>
+                )}
               </button>
             </form>
           </div>
