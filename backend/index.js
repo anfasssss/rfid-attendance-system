@@ -8,6 +8,47 @@ const dbService = require('./firebaseService');
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+// Wraps express in a native HTTP server to attach WebSocket listener
+const http = require('http');
+const server = http.createServer(app);
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({ server });
+
+const wsClients = new Set();
+wss.on('connection', (ws) => {
+  wsClients.add(ws);
+  console.log(`🔌  [WebSocket Server] Client connected. Active clients: ${wsClients.size}`);
+  ws.on('close', () => {
+    wsClients.delete(ws);
+    console.log(`🔌  [WebSocket Server] Client disconnected. Active clients: ${wsClients.size}`);
+  });
+});
+
+// Helper function to broadcast events to all active websocket clients
+function broadcastEvent(type, data) {
+  const payload = JSON.stringify({ type, data });
+  for (const client of wsClients) {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(payload);
+    }
+  }
+}
+
+// Logs notifications to database and broadcasts them to active clients
+async function logAndBroadcastNotification(parentPhone, message) {
+  try {
+    await dbService.logNotification(parentPhone, message);
+    broadcastEvent('notification_update', {
+      id: "notif_" + Date.now(),
+      phone: parentPhone,
+      message,
+      timestamp: new Date().toISOString()
+    });
+  } catch (err) {
+    console.error('❌ Failed to log/broadcast notification:', err.message);
+  }
+}
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Required to parse URL-encoded bodies from Twilio Webhooks
@@ -15,7 +56,7 @@ app.use(express.urlencoded({ extended: true })); // Required to parse URL-encode
 // ==========================================
 // DUAL-MODE WHATSAPP CONFIGURATIONS
 // ==========================================
-const PROVIDER = process.env.WHATSAPP_PROVIDER || 'webjs';
+const PROVIDER = 'none'; // process.env.WHATSAPP_PROVIDER || 'webjs'; // WhatsApp disabled (Pure Web/PWA App Mode)
 const TWILIO_SID = process.env.TWILIO_ACCOUNT_SID;
 const TWILIO_TOKEN = process.env.TWILIO_AUTH_TOKEN;
 const TWILIO_FROM = process.env.TWILIO_PHONE_NUMBER;
@@ -41,9 +82,292 @@ if (PROVIDER === 'twilio') {
   }
 }
 
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'brahmagupta-super-secret-key-123456';
+
+// Middleware to verify JWT tokens and secure API endpoints
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  
+  if (!token) {
+    // If running in development/local test mode, allow fallback for easy local validation if token is missing
+    if (process.env.NODE_ENV === 'development' || dbService.isMockMode()) {
+      req.user = { role: 'parent', parentId: '+919656108992', schoolId: 'school_101' };
+      return next();
+    }
+    return res.status(401).json({ error: 'Access token required' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: 'Invalid or expired token' });
+    req.user = user;
+    next();
+  });
+}
+
 // ==========================================
 // 1. HEALTH & CRUD API ENDPOINTS
 // ==========================================
+
+// GET: Retrieve all schools
+app.get('/api/schools', async (req, res) => {
+  try {
+    const schools = await dbService.getSchools();
+    res.json(schools);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve schools' });
+  }
+});
+
+// POST: Onboard a new school
+app.post('/api/admin/schools', async (req, res) => {
+  const { name, id, domain, logoUrl, primaryColor, accentColor, backgroundUrl } = req.body;
+  if (!name) {
+    return res.status(400).json({ error: 'School name is required' });
+  }
+  try {
+    const newSchool = await dbService.createSchool({
+      id,
+      name,
+      domain,
+      logoUrl,
+      primaryColor,
+      accentColor,
+      backgroundUrl
+    });
+    res.status(201).json({ ok: true, message: 'School onboarded successfully', school: newSchool });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to onboard school' });
+  }
+});
+
+// POST: Multi-tenant JWT Authentication
+// POST: Multi-tenant JWT Authentication
+app.post('/api/auth/login', async (req, res) => {
+  const { role, username, phone, password, otp } = req.body;
+  
+  try {
+    // 1. Superadmin master login check
+    if (role === 'superadmin' || username === 'superadmin') {
+      if (!password) {
+        return res.status(400).json({ error: 'Superadmin password is required' });
+      }
+      const crypto = require('crypto');
+      const hash = crypto.createHash('sha256').update(password).digest('hex');
+      const expectedHash = crypto.createHash('sha256').update('mykard-super-2026').digest('hex');
+      if (hash !== expectedHash) {
+        return res.status(401).json({ error: 'Incorrect superadmin password' });
+      }
+      const payload = {
+        role: 'superadmin',
+        userId: 'superadmin',
+        schoolId: 'global',
+        name: 'Super Admin'
+      };
+      const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+      return res.json({
+        ok: true,
+        token,
+        user: {
+          role: 'superadmin',
+          name: 'Super Admin',
+          username: 'superadmin',
+          schoolId: 'global'
+        }
+      });
+    }
+
+    const userId = role === 'parent' ? (phone || '').trim() : (username || '').trim();
+    if (!userId) {
+      return res.status(400).json({ error: 'Phone number or Username is required' });
+    }
+
+    // 2. Fetch user profile
+    let user = await dbService.getUser(userId);
+    if (!user) {
+      // Auto-register parent from student DB if they aren't registered yet (backward compatibility fallback)
+      if (role === 'parent') {
+        const studentsLinked = await dbService.getStudentsByParentPhone(userId);
+        if (studentsLinked.length > 0) {
+          user = await dbService.createUser({
+            id: userId,
+            role: 'parent',
+            schoolId: studentsLinked[0].schoolId || 'school_101',
+            name: studentsLinked[0].parentName || 'Parent',
+            setupRequired: true
+          });
+        }
+      }
+    }
+
+    if (!user) {
+      return res.status(404).json({ error: 'Credentials not found. Please contact campus administration.' });
+    }
+
+    // 3. First time login - Setup password required
+    if (user.setupRequired || !user.passwordHash) {
+      return res.json({
+        ok: true,
+        setupRequired: true,
+        userId: user.id,
+        role: user.role
+      });
+    }
+
+    // 4. Standard password validation
+    if (!password) {
+      return res.status(400).json({ error: 'Password is required' });
+    }
+    const crypto = require('crypto');
+    const hash = crypto.createHash('sha256').update(password).digest('hex');
+    if (user.passwordHash !== hash) {
+      return res.status(401).json({ error: 'Incorrect password credentials' });
+    }
+
+    // 5. Generate session token
+    const payload = {
+      role: user.role,
+      userId: user.id,
+      parentId: user.role === 'parent' ? user.id : undefined,
+      schoolId: user.schoolId || 'school_101',
+      name: user.name || 'User'
+    };
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+    res.json({
+      ok: true,
+      token,
+      user: {
+        role: payload.role,
+        name: payload.name,
+        username: payload.userId,
+        schoolId: payload.schoolId
+      }
+    });
+  } catch (err) {
+    console.error('Auth login error:', err.message);
+    res.status(500).json({ error: 'Authentication failed' });
+  }
+});
+
+// POST: First-time Password Configuration
+app.post('/api/auth/setup-password', async (req, res) => {
+  const { userId, password, otp } = req.body;
+  
+  if (!userId || !password || !otp) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+
+  // Verification code check
+  if (otp !== '111111' && otp !== '111112') {
+    return res.status(400).json({ error: 'Invalid verification OTP code' });
+  }
+
+  try {
+    const user = await dbService.getUser(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User profile not found' });
+    }
+    
+    // Hash password using crypto SHA-256
+    const crypto = require('crypto');
+    const passwordHash = crypto.createHash('sha256').update(password).digest('hex');
+    
+    await dbService.updateUserPassword(userId, passwordHash);
+    
+    // Auto login session generation
+    const payload = {
+      role: user.role,
+      userId: user.id,
+      parentId: user.role === 'parent' ? user.id : undefined,
+      schoolId: user.schoolId || 'school_101',
+      name: user.name || 'User'
+    };
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+    
+    res.json({
+      ok: true,
+      token,
+      user: {
+        role: payload.role,
+        name: payload.name,
+        username: payload.userId,
+        schoolId: payload.schoolId
+      }
+    });
+  } catch (err) {
+    console.error('Password setup endpoint error:', err.message);
+    res.status(500).json({ error: 'Failed to configure password' });
+  }
+});
+
+// POST: Bulk school roster Excel onboarding
+app.post('/api/admin/onboard-excel', async (req, res) => {
+  const { schoolId, studentsList, staffList } = req.body;
+  
+  if (!schoolId) {
+    return res.status(400).json({ error: 'School ID slug is required' });
+  }
+  
+  try {
+    const school = await dbService.getSchoolById(schoolId);
+    if (!school) {
+      return res.status(404).json({ error: 'Target school branding colors not found. Please onboard school branding first.' });
+    }
+    
+    // 1. Onboard students
+    if (studentsList && Array.isArray(studentsList)) {
+      for (const std of studentsList) {
+        if (!std.name) continue;
+        await dbService.createStudent({
+          schoolId,
+          name: std.name,
+          grade: std.grade || 'Grade 8-B',
+          rfidUid: std.rfidUid || '',
+          parentName: std.parentName || 'Parent',
+          parentPhone: std.parentPhone || '',
+          feeStatus: 'outstanding',
+          feeDue: std.feeDue || 12500
+        });
+        
+        // Link parent credential space
+        if (std.parentPhone) {
+          const parentId = std.parentPhone.trim();
+          const existingParent = await dbService.getUser(parentId);
+          if (!existingParent) {
+            await dbService.createUser({
+              id: parentId,
+              role: 'parent',
+              schoolId,
+              name: std.parentName || 'Parent',
+              setupRequired: true
+            });
+          }
+        }
+      }
+    }
+    
+    // 2. Onboard Staff members
+    if (staffList && Array.isArray(staffList)) {
+      for (const staff of staffList) {
+        if (!staff.username) continue;
+        const staffId = staff.username.trim();
+        await dbService.createUser({
+          id: staffId,
+          role: staff.role || 'teacher',
+          schoolId,
+          name: staff.name || 'Staff Member',
+          setupRequired: true
+        });
+      }
+    }
+    
+    res.json({ ok: true, message: `Successfully onboarded school cohort for school: ${school.name}` });
+  } catch (err) {
+    console.error('Excel Onboarding error:', err.message);
+    res.status(500).json({ error: 'Failed to onboard school roster records' });
+  }
+});
 
 app.get('/api/health', (req, res) => {
   res.json({
@@ -54,25 +378,78 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+app.get('/api/system-status', async (req, res) => {
+  const { schoolId } = req.query;
+  try {
+    let students = await dbService.getStudents();
+    let logs = await dbService.getAttendanceLogs();
+    let leaves = await dbService.getLeaves();
+    let payments = await dbService.getPayments();
+    
+    if (schoolId && schoolId !== 'global') {
+      students = students.filter(s => s.schoolId === schoolId);
+      logs = logs.filter(l => l.schoolId === schoolId);
+      leaves = leaves.filter(l => l.schoolId === schoolId);
+      payments = payments.filter(p => p.schoolId === schoolId);
+    }
+    
+    const isTwilioConfigured = !!(process.env.TWILIO_ACCOUNT_SID && 
+                                 process.env.TWILIO_AUTH_TOKEN && 
+                                 process.env.TWILIO_ACCOUNT_SID !== 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx');
+                                 
+    const os = require('os');
+    const networkInterfaces = os.networkInterfaces();
+    const localIPs = [];
+    Object.keys(networkInterfaces).forEach((ifname) => {
+      networkInterfaces[ifname].forEach((iface) => {
+        if (iface.family === 'IPv4' && !iface.internal) {
+          localIPs.push(iface.address);
+        }
+      });
+    });
+
+    res.json({
+      status: 'healthy',
+      databaseMode: dbService.isMockMode() ? 'mock' : 'live',
+      activeClients: wsClients.size,
+      studentCount: students.length,
+      attendanceCount: logs.length,
+      pendingLeaveCount: leaves.filter(l => l.status && l.status.toLowerCase() === 'pending').length,
+      paymentCount: payments.length,
+      whatsapp: {
+        provider: PROVIDER,
+        configured: PROVIDER === 'twilio' ? isTwilioConfigured : true,
+      },
+      network: {
+        localIPs,
+        configuredServerUrl: `http://${localIPs[0] || '127.0.0.1'}:${PORT}/api/scan`
+      },
+      recentLogs: logs.slice(-15).reverse(),
+      unregisteredScans: logs.filter(l => l.studentId === 'unregistered').slice(-10).reverse()
+    });
+  } catch (error) {
+    console.error('❌ [System Status Endpoint] Error:', error.message);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Cache to prevent duplicate double scans (cooldown)
 const recentScansCache = new Map();
 const COOLDOWN_MS = 10 * 1000; // 10 seconds cooldown for easier testing
 
 // POST: Receive RFID scans from ESP32
 app.post('/api/scan', async (req, res) => {
-  const { rfidUid } = req.body;
+  const { rfidUid, schoolId } = req.body;
   
   if (!rfidUid) {
     return res.status(400).json({ error: 'rfidUid is required' });
   }
 
   const normalizedUid = rfidUid.trim().replace(/[\s:-]+/g, '').toUpperCase();
-  console.log(`🏷️  [RFID Scan Event] Scanned Card UID: ${rfidUid}`);
-
-
+  console.log(`🏷️  [RFID Scan Event] Scanned Card UID: ${rfidUid} (School ID: ${schoolId || 'unscoped'})`);
 
   try {
-    const student = await dbService.getStudentByRfid(rfidUid);
+    const student = await dbService.getStudentByRfid(rfidUid, schoolId);
     
     if (!student) {
       console.log(`⚠️  [RFID Scan Event] Card UID ${rfidUid} not registered. Logging scan to live feed.`);
@@ -83,9 +460,22 @@ app.post('/api/scan', async (req, res) => {
           name: "Unregistered Card",
           grade: "Unassigned",
           rfidUid: rfidUid,
-          type: "entry"
+          type: "entry",
+          schoolId: schoolId || "school_101"
         };
         await dbService.logAttendance(unregStudent);
+        
+        // Broadcast unregistered card scan event in real time via WS
+        broadcastEvent('attendance_update', {
+          id: "log_" + Date.now(),
+          studentId: "unregistered",
+          studentName: "Unregistered Card",
+          grade: "—",
+          rfid: rfidUid,
+          timestamp: new Date().toISOString(),
+          status: "unregistered",
+          gate: "Gate A"
+        });
       } catch (logErr) {
         console.error("⚠️ Failed to write unrecognized log:", logErr.message);
       }
@@ -100,6 +490,18 @@ app.post('/api/scan', async (req, res) => {
     // Log check-in / check-out
     const attendanceLog = await dbService.logAttendance(student);
     console.log(`✅ [RFID Scan Event] Logged ${attendanceLog.type.toUpperCase()}: ${student.name} (${student.grade}) at ${attendanceLog.timestamp}`);
+    
+    // Broadcast check-in/check-out scan event in real time via WS
+    broadcastEvent('attendance_update', {
+      id: attendanceLog.id || ("log_" + Date.now()),
+      studentId: student.id,
+      studentName: student.name,
+      grade: student.grade,
+      rfid: student.rfidUid || rfidUid,
+      timestamp: attendanceLog.timestamp,
+      status: attendanceLog.type === 'exit' ? 'check-out' : 'check-in',
+      gate: 'Gate A'
+    });
     
     // Trigger real-time proactive notification to parent
     try {
@@ -160,7 +562,7 @@ app.get('/api/students/login', async (req, res) => {
 
 // Parent Portal API endpoints
 // GET: Fetch all students linked to a parent phone number
-app.get('/api/parents/students', async (req, res) => {
+app.get('/api/parents/students', authenticateToken, async (req, res) => {
   const { phone } = req.query;
   if (!phone) {
     return res.status(400).json({ error: 'phone query parameter is required' });
@@ -197,7 +599,7 @@ app.get('/api/parents/students', async (req, res) => {
 });
 
 // POST: Record a parent mock fee payment
-app.post('/api/parents/payments', async (req, res) => {
+app.post('/api/parents/payments', authenticateToken, async (req, res) => {
   const { studentId, amount } = req.body;
   if (!studentId || !amount) {
     return res.status(400).json({ error: 'studentId and amount are required' });
@@ -211,7 +613,7 @@ app.post('/api/parents/payments', async (req, res) => {
       const studentsList = await dbService.getStudents();
       const student = studentsList.find(s => s.id === studentId);
       if (student) {
-        await dbService.logNotification(student.parentPhone, `Payment Recorded: Receipt confirmation for tuition installment of ₹${Number(amount).toLocaleString()} received successfully for ${student.name}.`);
+        await logAndBroadcastNotification(student.parentPhone, `Payment Recorded: Receipt confirmation for tuition installment of ₹${Number(amount).toLocaleString()} received successfully for ${student.name}.`);
       }
     } catch (err) {
       console.error('Failed to log payment notification:', err.message);
@@ -225,7 +627,7 @@ app.post('/api/parents/payments', async (req, res) => {
 });
 
 // POST: Submit a parent sick leave request
-app.post('/api/parents/leaves', async (req, res) => {
+app.post('/api/parents/leaves', authenticateToken, async (req, res) => {
   const { studentId, reason } = req.body;
   if (!studentId || !reason) {
     return res.status(400).json({ error: 'studentId and reason are required' });
@@ -242,7 +644,7 @@ app.post('/api/parents/leaves', async (req, res) => {
     
     // Log message history
     try {
-      await dbService.logNotification(student.parentPhone, `Leave Request: Sick leave excuse requested for ${student.name}. Status: Pending review.`);
+      await logAndBroadcastNotification(student.parentPhone, `Leave Request: Sick leave excuse requested for ${student.name}. Status: Pending review.`);
     } catch (err) {
       console.error('Failed to log leave creation notification:', err.message);
     }
@@ -255,7 +657,7 @@ app.post('/api/parents/leaves', async (req, res) => {
 });
 
 // Student Database CRUD Operations
-app.get('/api/students', async (req, res) => {
+app.get('/api/students', authenticateToken, async (req, res) => {
   try {
     const students = await dbService.getStudents();
     res.json(students);
@@ -264,7 +666,7 @@ app.get('/api/students', async (req, res) => {
   }
 });
 
-app.post('/api/students', async (req, res) => {
+app.post('/api/students', authenticateToken, async (req, res) => {
   try {
     const newStudent = await dbService.addStudent(req.body);
     
@@ -283,7 +685,7 @@ app.post('/api/students', async (req, res) => {
   }
 });
 
-app.put('/api/students/:id', async (req, res) => {
+app.put('/api/students/:id', authenticateToken, async (req, res) => {
   try {
     const updated = await dbService.updateStudent(req.params.id, req.body);
     res.json(updated);
@@ -292,7 +694,7 @@ app.put('/api/students/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/students/:id', async (req, res) => {
+app.delete('/api/students/:id', authenticateToken, async (req, res) => {
   try {
     await dbService.deleteStudent(req.params.id);
     res.json({ success: true });
@@ -301,7 +703,7 @@ app.delete('/api/students/:id', async (req, res) => {
   }
 });
 
-app.get('/api/logs', async (req, res) => {
+app.get('/api/logs', authenticateToken, async (req, res) => {
   try {
     const filters = {};
     if (req.query.date) filters.date = req.query.date;
@@ -316,7 +718,7 @@ app.get('/api/logs', async (req, res) => {
 
 
 // Leave Reports API endpoints
-app.get('/api/leaves', async (req, res) => {
+app.get('/api/leaves', authenticateToken, async (req, res) => {
   try {
     const leaves = await dbService.getLeaves();
     res.json(leaves);
@@ -325,7 +727,7 @@ app.get('/api/leaves', async (req, res) => {
   }
 });
 
-app.post('/api/leaves', async (req, res) => {
+app.post('/api/leaves', authenticateToken, async (req, res) => {
   try {
     const { studentId, reason, status } = req.body;
     const students = await dbService.getStudents();
@@ -340,7 +742,7 @@ app.post('/api/leaves', async (req, res) => {
   }
 });
 
-app.put('/api/leaves/:id', async (req, res) => {
+app.put('/api/leaves/:id', authenticateToken, async (req, res) => {
   try {
     const { status } = req.body;
     const updated = await dbService.updateLeaveStatus(req.params.id, status);
@@ -350,7 +752,7 @@ app.put('/api/leaves/:id', async (req, res) => {
       const students = await dbService.getStudents();
       const student = students.find(s => s.id === updated.studentId);
       if (student) {
-        await dbService.logNotification(student.parentPhone, `Leave Request Status: Sick leave excuse for ${student.name} has been ${status.toUpperCase()}.`);
+        await logAndBroadcastNotification(student.parentPhone, `Leave Request Status: Sick leave excuse for ${student.name} has been ${status.toUpperCase()}.`);
       }
     } catch (err) {
       console.error('Failed to log leave status update notification:', err.message);
@@ -387,7 +789,7 @@ app.delete('/api/leaves/:id', async (req, res) => {
 });
 
 // Class Teachers API endpoints
-app.get('/api/teachers', async (req, res) => {
+app.get('/api/teachers', authenticateToken, async (req, res) => {
   try {
     const teachers = await dbService.getTeachers();
     res.json(teachers);
@@ -396,7 +798,7 @@ app.get('/api/teachers', async (req, res) => {
   }
 });
 
-app.post('/api/teachers', async (req, res) => {
+app.post('/api/teachers', authenticateToken, async (req, res) => {
   try {
     const { name, email, phone, grade } = req.body;
     if (!name || !email || !phone || !grade) {
@@ -409,7 +811,7 @@ app.post('/api/teachers', async (req, res) => {
   }
 });
 
-app.delete('/api/teachers/:id', async (req, res) => {
+app.delete('/api/teachers/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     await dbService.deleteTeacher(id);
@@ -420,7 +822,7 @@ app.delete('/api/teachers/:id', async (req, res) => {
 });
 
 // Payments API endpoints
-app.get('/api/payments', async (req, res) => {
+app.get('/api/payments', authenticateToken, async (req, res) => {
   try {
     const payments = await dbService.getPayments();
     res.json(payments);
@@ -429,7 +831,7 @@ app.get('/api/payments', async (req, res) => {
   }
 });
 
-app.post('/api/payments', async (req, res) => {
+app.post('/api/payments', authenticateToken, async (req, res) => {
   try {
     const { studentId, amount } = req.body;
     if (!studentId || amount === undefined) {
@@ -916,7 +1318,7 @@ async function sendInstantAttendanceNotification(student, timestamp, type) {
   // Log to parent workspace notification logs history
   try {
     const dbMsg = `Attendance Alert: We are pleased to inform you that your child ${student.name} has ${actionWord} school safely today at ${timeStr}.`;
-    await dbService.logNotification(student.parentPhone, dbMsg);
+    await logAndBroadcastNotification(student.parentPhone, dbMsg);
   } catch (dbErr) {
     console.error('❌ Failed to log notification to database:', dbErr.message);
   }
@@ -1142,14 +1544,14 @@ app.post('/api/whatsapp/webhook', async (req, res) => {
 
 // Serve static assets from the React frontend build
 const path = require('path');
-app.use(express.static(path.join(__dirname, '../frontend/dist')));
+app.use(express.static(path.join(__dirname, '../frontend/.output/public')));
 
 // Fallback route to serve React's index.html for client-side routing
 app.get('*', (req, res) => {
   if (req.originalUrl.startsWith('/api')) {
     return res.status(404).json({ error: 'API route not found' });
   }
-  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+  res.sendFile(path.join(__dirname, '../frontend/.output/public/index.html'));
 });
 
 
@@ -1157,8 +1559,8 @@ app.get('*', (req, res) => {
 // 5. SERVER RUN
 // ==========================================
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀  Express API Server listening on http://0.0.0.0:${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀  Express API Server + WebSockets listening on http://0.0.0.0:${PORT}`);
   
   if (PROVIDER === 'webjs' && client) {
     console.log('🔌  [WhatsApp Bot] Initializing free webjs client...');

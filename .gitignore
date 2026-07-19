@@ -23,3 +23,15 @@ backend/.wwebjs_cache/
 .vscode/
 .idea/
 .gemini/
+
+# Standalone JDK & Built Packages
+jdk/
+*.apk
+
+# Design Archives & Backups
+stitch_design.zip
+stitch_mykard_connected_campus_portal 2/
+stitch_unzipped/
+frontend_old/
+portal princi /
+HANDOVER.md

@@ -1,0 +1,100 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/lib/auth";
+import { StatCard } from "@/components/dashboard/StatCard";
+import {
+  fetchAttendanceLogs,
+  fetchLeaves,
+  fetchParentStudents,
+  fetchStudents,
+} from "@/lib/api";
+import type { AttendanceLog, LeaveRequest, Student } from "@/lib/mock-data";
+import {
+  Users,
+  Percent,
+  Radio,
+  ShieldAlert,
+  UserCheck,
+  UserX,
+  Clock,
+  GraduationCap,
+  ShieldCheck,
+} from "lucide-react";
+
+export const Route = createFileRoute("/dashboard/")({ component: Overview });
+
+function Overview() {
+  const { session } = useAuth();
+  const [logs, setLogs] = useState<AttendanceLog[]>([]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [leaves, setLeaves] = useState<LeaveRequest[]>([]);
+  const [kids, setKids] = useState<Student[]>([]);
+
+  useEffect(() => {
+    fetchAttendanceLogs().then(setLogs);
+    fetchStudents().then(setStudents);
+    fetchLeaves().then(setLeaves);
+    if (session?.parentId) fetchParentStudents(session.parentId).then(setKids);
+  }, [session]);
+
+  if (!session) return null;
+
+  if (session.role === "principal") {
+    const checkedIn = logs.filter((l) => l.status === "check-in" || l.status === "late").length;
+    const alerts =
+      logs.filter((l) => l.status === "unregistered").length +
+      leaves.filter((l) => l.status === "pending").length;
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Active Students" value={192} hint="↑ 2 this week" icon={<Users />} accent="indigo" />
+        <StatCard label="Check-in Rate" value="94%" hint="target 92%" icon={<Percent />} accent="cyan" />
+        <StatCard label="Scans (last 15m)" value={logs.length} hint="live feed" icon={<Radio />} accent="terminal" />
+        <StatCard label="Alerts" value={alerts} hint="need attention" icon={<ShieldAlert />} accent="magenta" />
+      </div>
+    );
+  }
+
+  if (session.role === "teacher") {
+    const grade = session.grade ?? "8-B";
+    const classStudents = students.filter((s) => s.grade === grade);
+    const classLogs = logs.filter((l) => l.grade === grade);
+    const present = classStudents.filter((s) =>
+      classLogs.some((l) => l.studentId === s.id && (l.status === "check-in" || l.status === "late")),
+    ).length;
+    const late = classLogs.filter((l) => l.status === "late").length;
+    const absent = Math.max(0, classStudents.length - present);
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Class Size" value={classStudents.length} hint={`grade ${grade}`} accent="indigo" />
+        <StatCard label="Present" value={present} hint="checked in today" icon={<UserCheck />} accent="terminal" />
+        <StatCard label="Absent" value={absent} hint="no scan yet" icon={<UserX />} accent="magenta" />
+        <StatCard label="Late Arrivals" value={late} hint="after 08:30" icon={<Clock />} accent="cyan" />
+      </div>
+    );
+  }
+
+  if (session.role === "parent") {
+    const totalDue = kids.reduce((s, k) => s + k.feeDue, 0);
+    const paid = kids.filter((k) => k.feeStatus === "paid").length;
+    const inToday = kids.filter((k) => logs.some((l) => l.studentId === k.id && l.status === "check-in")).length;
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Linked Children" value={kids.length} icon={<GraduationCap />} accent="indigo" />
+        <StatCard label="Checked In Today" value={inToday} icon={<ShieldCheck />} accent="terminal" />
+        <StatCard label="Outstanding" value={`₹${totalDue.toLocaleString()}`} hint="fees due" accent="magenta" />
+        <StatCard label="Fully Paid" value={`${paid}/${kids.length}`} accent="cyan" />
+      </div>
+    );
+  }
+
+  // student
+  const me = students.find((s) => s.id === session.studentId);
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <StatCard label="Attendance" value="96%" hint="term-to-date" accent="terminal" />
+      <StatCard label="Late Marks" value="2" accent="magenta" />
+      <StatCard label="Grade" value={me?.grade ?? "—"} accent="indigo" />
+      <StatCard label="Fee Status" value={me?.feeStatus === "paid" ? "Cleared" : `₹${me?.feeDue ?? 0}`} accent="cyan" />
+    </div>
+  );
+}

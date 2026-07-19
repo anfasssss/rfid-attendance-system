@@ -69,9 +69,11 @@
 #endif
 
 // --- CONFIGURATION ---
-const char* ssid = "Taste Buds";             // Replace with your Wi-Fi SSID
-const char* password = "ansarali134";                 // Replace with your Wi-Fi Password
-const char* serverUrl = "http://192.168.1.17:5001/api/scan"; // Replace with your Node.js server IP
+const char* ssid = "Hipower:Broadband";             // Replace with your Wi-Fi SSID
+const char* password = "abcd1234";     // Replace with your Wi-Fi Password
+const char* serverHost = "192.168.30.10";
+const int serverPort = 5001;
+String serverUrl = "http://192.168.30.10:5001/api/scan";
 
 // --- HARDWARE PIN OUTS ---
 #define RST_PIN     14  // Relocated to GPIO 14 to allow free I2C SCL pin on GPIO 22
@@ -187,6 +189,66 @@ void blinkLedConfirm(int blinks, int durationMs) {
   }
 }
 
+// Attempts to find the MacBook IP address dynamically on the local network
+void autoDiscoverServer() {
+  if (WiFi.status() != WL_CONNECTED) return;
+
+  Serial.println("\n🔍 [Discovery] Initiating auto-discovery for MacBook server...");
+  drawDisplayMessage("DISCOVERY", "Searching server", "Please wait...", "");
+
+  // 1. Try resolving using hostname first
+  Serial.printf("🔍 [Discovery] Testing hostname: %s on port %d\n", serverHost, serverPort);
+  WiFiClient testClient;
+  if (testClient.connect(serverHost, serverPort)) {
+    Serial.println("✅ [Discovery] Server found at hostname!");
+    serverUrl = "http://" + String(serverHost) + ":" + String(serverPort) + "/api/scan";
+    return;
+  }
+
+  // 2. If hostname fails, perform a fast subnet scan
+  IPAddress localIP = WiFi.localIP();
+  IPAddress targetIP = localIP;
+  Serial.printf("🔍 [Discovery] Hostname failed. Scanning subnet %d.%d.%d.X...\n", localIP[0], localIP[1], localIP[2]);
+
+  for (int i = 1; i < 255; i++) {
+    targetIP[3] = i;
+    if (targetIP == localIP) continue; // skip self
+    yield();
+    delay(2);
+
+    if (i % 30 == 0) {
+      drawDisplayMessage("DISCOVERY", "Scanning subnet", String(i) + "/254 IPs done", "");
+    }
+
+    WiFiClient client;
+    client.setTimeout(40); // 40ms timeout for fast scan
+    if (client.connect(targetIP, serverPort)) {
+      Serial.printf("🎯 [Discovery] Found active listener at %s:%d! Verifying...\n", targetIP.toString().c_str(), serverPort);
+      
+      HTTPClient http;
+      String checkUrl = "http://" + targetIP.toString() + ":" + String(serverPort) + "/api/system-status";
+      http.begin(client, checkUrl);
+      http.setTimeout(150); // short timeout
+      int code = http.GET();
+      if (code == 200) {
+        String resp = http.getString();
+        if (resp.indexOf("uptime") != -1 || resp.indexOf("database") != -1) {
+          Serial.printf("✅ [Discovery] Validated server at IP: %s\n", targetIP.toString().c_str());
+          serverUrl = "http://" + targetIP.toString() + ":" + String(serverPort) + "/api/scan";
+          drawDisplayMessage("SERVER FOUND", "Locked at IP:", targetIP.toString(), "Ready!", 1500);
+          http.end();
+          return;
+        }
+      }
+      http.end();
+    }
+  }
+
+  // 3. Fallback: if scan fails, use hostname as a fallback
+  Serial.println("⚠️  [Discovery] Subnet scan did not find server. Falling back to hostname.");
+  serverUrl = "http://" + String(serverHost) + ":" + String(serverPort) + "/api/scan";
+}
+
 void setup() {
   Serial.begin(115200);
   delay(1000);
@@ -229,6 +291,10 @@ void setup() {
   drawDisplayMessage("BRAHMAGUPTA ACAD.", "SYSTEM BOOTING", "Initializing...", "V1.2.0-IoT", 1500);
 
   // 1. Connect to Wi-Fi
+  WiFi.disconnect(true);
+  delay(500);
+  WiFi.mode(WIFI_STA);
+  delay(500);
   WiFi.begin(ssid, password);
   Serial.print("Connecting to Wi-Fi");
   
@@ -263,6 +329,9 @@ void setup() {
 
     // Draw Wi-Fi success diagnostics
     drawDisplayMessage("WIFI CONNECTED", "IP Address:", WiFi.localIP().toString(), "Ready for Scans!", 2000);
+    
+    // Call server discovery
+    autoDiscoverServer();
     
     // Blink exactly 2 times on successful Wi-Fi connection
     for (int i = 0; i < 2; i++) {

@@ -94,10 +94,59 @@ function readMockDb() {
     if (!data.leaves) data.leaves = [];
     if (!data.teachers) data.teachers = [];
     if (!data.payments) data.payments = [];
+    if (!data.users) {
+      data.users = [
+        {
+          id: "+919656108992",
+          role: "parent",
+          schoolId: "school_101",
+          name: "Emily Jenkins",
+          passwordHash: "", // blank passwordHash means setupRequired: true
+          setupRequired: true,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: "teacher_001",
+          role: "teacher",
+          schoolId: "school_101",
+          name: "Anjali Nair",
+          passwordHash: "",
+          setupRequired: true,
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: "admin_001",
+          role: "principal",
+          schoolId: "school_101",
+          name: "Principal Principal",
+          passwordHash: "",
+          setupRequired: true,
+          createdAt: new Date().toISOString()
+        }
+      ];
+      fs.writeFileSync(mockDbPath, JSON.stringify(data, null, 2));
+    }
+    if (!data.schools) {
+      data.schools = [
+        {
+          id: "school_101",
+          name: "St. Mary's Public School",
+          domain: "stmarys.mykard.com",
+          branding: {
+            logoUrl: "/school_logo.png",
+            primaryColor: "#4D69D6",
+            accentColor: "#6366F1",
+            backgroundUrl: "/background.png"
+          },
+          createdAt: new Date().toISOString()
+        }
+      ];
+      fs.writeFileSync(mockDbPath, JSON.stringify(data, null, 2));
+    }
     return data;
   } catch (err) {
     console.error('❌ Error reading mock DB:', err.message);
-    return { students: [], attendance_logs: [], leaves: [], teachers: [], payments: [] };
+    return { students: [], attendance_logs: [], leaves: [], teachers: [], payments: [], schools: [], users: [] };
   }
 }
 
@@ -126,18 +175,21 @@ function enrichStudent(student) {
 const dbService = {
   isMockMode: () => isMock,
 
-  // 1. Get student by RFID UID
-  getStudentByRfid: async (rfidUid) => {
+  getStudentByRfid: async (rfidUid, schoolId) => {
     const normalizedUid = rfidUid.trim().replace(/[\s:-]+/g, '').toUpperCase();
     if (isMock) {
       const data = readMockDb();
-      const student = data.students.find(s => s.rfidUid.trim().replace(/[\s:-]+/g, '').toUpperCase() === normalizedUid);
+      const student = data.students.find(s => 
+        s.rfidUid.trim().replace(/[\s:-]+/g, '').toUpperCase() === normalizedUid &&
+        (!schoolId || s.schoolId === schoolId)
+      );
       return enrichStudent(student);
     } else {
-      const snapshot = await db.collection('students')
-        .where('rfidUid', '==', normalizedUid)
-        .limit(1)
-        .get();
+      let query = db.collection('students').where('rfidUid', '==', normalizedUid);
+      if (schoolId) {
+        query = query.where('schoolId', '==', schoolId);
+      }
+      const snapshot = await query.limit(1).get();
       if (snapshot.empty) return null;
       const doc = snapshot.docs[0];
       return enrichStudent({ id: doc.id, ...doc.data() });
@@ -622,6 +674,144 @@ const dbService = {
       });
       results.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       return results;
+    }
+  },
+  
+  // 17. School Multi-Tenancy Operations
+  getSchools: async () => {
+    if (isMock) {
+      const data = readMockDb();
+      return data.schools || [];
+    } else {
+      const snapshot = await db.collection('schools').get();
+      const results = [];
+      snapshot.forEach(doc => {
+        results.push({ id: doc.id, ...doc.data() });
+      });
+      return results;
+    }
+  },
+
+  getSchoolById: async (id) => {
+    if (isMock) {
+      const data = readMockDb();
+      return (data.schools || []).find(s => s.id === id) || null;
+    } else {
+      const doc = await db.collection('schools').doc(id).get();
+      if (!doc.exists) return null;
+      return { id: doc.id, ...doc.data() };
+    }
+  },
+
+  createSchool: async (schoolData) => {
+    const newSchool = {
+      id: schoolData.id || 'school_' + Date.now(),
+      name: schoolData.name,
+      domain: schoolData.domain || '',
+      branding: {
+        logoUrl: schoolData.logoUrl || '/school_logo.png',
+        primaryColor: schoolData.primaryColor || '#4D69D6',
+        accentColor: schoolData.accentColor || '#6366F1',
+        backgroundUrl: schoolData.backgroundUrl || '/background.png'
+      },
+      createdAt: new Date().toISOString()
+    };
+
+    if (isMock) {
+      const data = readMockDb();
+      if (!data.schools) data.schools = [];
+      data.schools.push(newSchool);
+      writeMockDb(data);
+      return newSchool;
+    } else {
+      await db.collection('schools').doc(newSchool.id).set(newSchool);
+      return newSchool;
+    }
+  },
+
+  getUser: async (userId) => {
+    const normalizedId = userId.trim();
+    if (isMock) {
+      const data = readMockDb();
+      if (!data.users) data.users = [];
+      return data.users.find(u => u.id === normalizedId) || null;
+    } else {
+      const doc = await db.collection('users').doc(normalizedId).get();
+      if (!doc.exists) return null;
+      return { id: doc.id, ...doc.data() };
+    }
+  },
+
+  createUser: async (userData) => {
+    const newUser = {
+      id: userData.id.trim(),
+      role: userData.role,
+      schoolId: userData.schoolId || 'school_101',
+      name: userData.name || '',
+      passwordHash: userData.passwordHash || '',
+      setupRequired: userData.setupRequired !== undefined ? userData.setupRequired : true,
+      createdAt: new Date().toISOString()
+    };
+
+    if (isMock) {
+      const data = readMockDb();
+      if (!data.users) data.users = [];
+      data.users = data.users.filter(u => u.id !== newUser.id);
+      data.users.push(newUser);
+      writeMockDb(data);
+      return newUser;
+    } else {
+      await db.collection('users').doc(newUser.id).set(newUser);
+      return newUser;
+    }
+  },
+
+  updateUserPassword: async (userId, passwordHash) => {
+    const normalizedId = userId.trim();
+    if (isMock) {
+      const data = readMockDb();
+      if (!data.users) data.users = [];
+      const user = data.users.find(u => u.id === normalizedId);
+      if (user) {
+        user.passwordHash = passwordHash;
+        user.setupRequired = false;
+        writeMockDb(data);
+        return user;
+      }
+      return null;
+    } else {
+      const ref = db.collection('users').doc(normalizedId);
+      await ref.update({
+        passwordHash: passwordHash,
+        setupRequired: false
+      });
+      const updated = await ref.get();
+      return { id: updated.id, ...updated.data() };
+    }
+  },
+
+  createStudent: async (studentData) => {
+    const newStudent = {
+      id: studentData.id || 'std_' + Date.now() + Math.floor(Math.random() * 1000),
+      schoolId: studentData.schoolId || 'school_101',
+      name: studentData.name,
+      grade: studentData.grade || 'Grade 8-B',
+      rfidUid: studentData.rfidUid || '',
+      parentName: studentData.parentName || '',
+      parentPhone: studentData.parentPhone.trim().replace(/\s+/g, ''),
+      feeStatus: studentData.feeStatus || 'paid',
+      feeDue: studentData.feeDue || 0,
+      createdAt: new Date().toISOString()
+    };
+
+    if (isMock) {
+      const data = readMockDb();
+      data.students.push(newStudent);
+      writeMockDb(data);
+      return newStudent;
+    } else {
+      await db.collection('students').doc(newStudent.id).set(newStudent);
+      return newStudent;
     }
   }
 };

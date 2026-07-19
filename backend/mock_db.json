@@ -17,10 +17,21 @@
       "grade": "10 a",
       "rfidUid": "07 13 88 31",
       "parentName": "koya",
-      "parentPhone": "+919656108992",
+      "parentPhone": "+919000000000",
       "address": "Penthouse C, City Crest Towers, Cochin",
       "imageUrl": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&auto=format&fit=crop&q=80",
       "createdAt": "2026-05-26T04:41:20.338Z"
+    },
+    {
+      "id": "student_1783074964853",
+      "name": "hashif ",
+      "grade": "Grade 8-B",
+      "rfidUid": "F1883003",
+      "parentName": "anfas",
+      "parentPhone": "+919846229229",
+      "address": "",
+      "imageUrl": "",
+      "createdAt": "2026-07-03T10:36:04.852Z"
     }
   ],
   "attendance_logs": [
@@ -71,9 +82,9 @@
     },
     {
       "id": "log_1779818157945",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-26T17:55:57.945Z",
       "dateStr": "2026-05-26"
@@ -152,9 +163,9 @@
     },
     {
       "id": "log_1779818561704",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-26T18:02:41.704Z",
       "dateStr": "2026-05-26"
@@ -170,18 +181,18 @@
     },
     {
       "id": "log_1779818648701",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-26T18:04:08.701Z",
       "dateStr": "2026-05-26"
     },
     {
       "id": "log_1779818655795",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-26T18:04:15.795Z",
       "dateStr": "2026-05-26"
@@ -206,9 +217,9 @@
     },
     {
       "id": "log_1779819381515",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-26T18:16:21.515Z",
       "dateStr": "2026-05-26"
@@ -269,9 +280,9 @@
     },
     {
       "id": "log_1779820115422",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-26T18:28:35.422Z",
       "dateStr": "2026-05-26"
@@ -287,9 +298,9 @@
     },
     {
       "id": "log_1779820317299",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-26T18:31:57.299Z",
       "dateStr": "2026-05-26"
@@ -458,9 +469,9 @@
     },
     {
       "id": "log_1779823115075",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-26T19:18:35.074Z",
       "dateStr": "2026-05-26"
@@ -503,18 +514,18 @@
     },
     {
       "id": "log_1779823415392",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-26T19:23:35.388Z",
       "dateStr": "2026-05-26"
     },
     {
       "id": "log_1779823567772",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-26T19:26:07.772Z",
       "dateStr": "2026-05-26"
@@ -584,9 +595,9 @@
     },
     {
       "id": "log_1779851779448",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-27T03:16:19.448Z",
       "dateStr": "2026-05-27"
@@ -602,27 +613,27 @@
     },
     {
       "id": "log_1779851963587",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-27T03:19:23.587Z",
       "dateStr": "2026-05-27"
     },
     {
       "id": "log_1779851967726",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-27T03:19:27.725Z",
       "dateStr": "2026-05-27"
     },
     {
       "id": "log_1779894407980",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-27T15:06:47.980Z",
       "dateStr": "2026-05-27"
@@ -746,18 +757,18 @@
     },
     {
       "id": "log_1779942495903",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-28T04:28:15.902Z",
       "dateStr": "2026-05-28"
     },
     {
       "id": "log_1779942506087",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-28T04:28:26.087Z",
       "dateStr": "2026-05-28"
@@ -773,18 +784,18 @@
     },
     {
       "id": "log_1779943132830",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-28T04:38:52.829Z",
       "dateStr": "2026-05-28"
     },
     {
       "id": "log_1779943137906",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-05-28T04:38:57.906Z",
       "dateStr": "2026-05-28"
@@ -1052,9 +1063,9 @@
     },
     {
       "id": "log_1780987768450",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-06-09T06:49:28.449Z",
       "dateStr": "2026-06-09"
@@ -1097,9 +1108,9 @@
     },
     {
       "id": "log_1782230973935",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-06-23T16:09:33.935Z",
       "dateStr": "2026-06-23"
@@ -1142,9 +1153,9 @@
     },
     {
       "id": "log_1782233251678",
-      "studentId": "unregistered",
-      "studentName": "Unregistered Card",
-      "grade": "Unassigned",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
       "rfidUid": "F1 88 30 03",
       "timestamp": "2026-06-23T16:47:31.678Z",
       "dateStr": "2026-06-23"
@@ -1184,6 +1195,419 @@
       "rfidUid": "07 13 88 31",
       "timestamp": "2026-06-29T18:20:22.897Z",
       "dateStr": "2026-06-29"
+    },
+    {
+      "id": "log_1782758457703",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-06-29T18:40:57.687Z",
+      "dateStr": "2026-06-29"
+    },
+    {
+      "id": "log_1783073619052",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-03T10:13:39.052Z",
+      "dateStr": "2026-07-03"
+    },
+    {
+      "id": "log_1783073633010",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
+      "rfidUid": "F1 88 30 03",
+      "timestamp": "2026-07-03T10:13:53.010Z",
+      "dateStr": "2026-07-03"
+    },
+    {
+      "id": "log_1783074140607",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
+      "rfidUid": "F1 88 30 03",
+      "timestamp": "2026-07-03T10:22:20.607Z",
+      "dateStr": "2026-07-03"
+    },
+    {
+      "id": "log_1783074150135",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-03T10:22:30.135Z",
+      "dateStr": "2026-07-03"
+    },
+    {
+      "id": "log_1783074483637",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-03T10:28:03.637Z",
+      "dateStr": "2026-07-03"
+    },
+    {
+      "id": "log_1783074567878",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
+      "rfidUid": "F1 88 30 03",
+      "timestamp": "2026-07-03T10:29:27.877Z",
+      "dateStr": "2026-07-03"
+    },
+    {
+      "id": "log_1783074631332",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-03T10:30:31.331Z",
+      "dateStr": "2026-07-03",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783074639372",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
+      "rfidUid": "F1 88 30 03",
+      "timestamp": "2026-07-03T10:30:39.372Z",
+      "dateStr": "2026-07-03",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783074653984",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
+      "rfidUid": "F1 88 30 03",
+      "timestamp": "2026-07-03T10:30:53.983Z",
+      "dateStr": "2026-07-03",
+      "type": "exit"
+    },
+    {
+      "id": "log_1783074730472",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-03T10:32:10.472Z",
+      "dateStr": "2026-07-03",
+      "type": "exit"
+    },
+    {
+      "id": "log_1783074839087",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-03T10:33:59.086Z",
+      "dateStr": "2026-07-03",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783074842996",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-03T10:34:02.995Z",
+      "dateStr": "2026-07-03",
+      "type": "exit"
+    },
+    {
+      "id": "log_1783074882850",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
+      "rfidUid": "F1 88 30 03",
+      "timestamp": "2026-07-03T10:34:42.848Z",
+      "dateStr": "2026-07-03",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783075079882",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
+      "rfidUid": "F1883003",
+      "timestamp": "2026-07-03T10:37:59.881Z",
+      "dateStr": "2026-07-03",
+      "type": "exit"
+    },
+    {
+      "id": "log_1783075085890",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
+      "rfidUid": "F1883003",
+      "timestamp": "2026-07-03T10:38:05.889Z",
+      "dateStr": "2026-07-03",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783077043966",
+      "studentId": "unregistered",
+      "studentName": "Unregistered Card",
+      "grade": "Unassigned",
+      "rfidUid": "E6 24 FD D9",
+      "timestamp": "2026-07-03T11:10:43.965Z",
+      "dateStr": "2026-07-03",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783271715080",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-05T17:15:15.079Z",
+      "dateStr": "2026-07-05",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783271723084",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
+      "rfidUid": "F1883003",
+      "timestamp": "2026-07-05T17:15:23.083Z",
+      "dateStr": "2026-07-05",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783271913156",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
+      "rfidUid": "F1883003",
+      "timestamp": "2026-07-05T17:18:33.156Z",
+      "dateStr": "2026-07-05",
+      "type": "exit"
+    },
+    {
+      "id": "log_1783271916881",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-05T17:18:36.880Z",
+      "dateStr": "2026-07-05",
+      "type": "exit"
+    },
+    {
+      "id": "log_1783272198844",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-05T17:23:18.843Z",
+      "dateStr": "2026-07-05",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783272541888",
+      "studentId": "student_1783074964853",
+      "studentName": "hashif ",
+      "grade": "Grade 8-B",
+      "rfidUid": "F1883003",
+      "timestamp": "2026-07-05T17:29:01.874Z",
+      "dateStr": "2026-07-05",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783272689674",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-05T17:31:29.673Z",
+      "dateStr": "2026-07-05",
+      "type": "exit"
+    },
+    {
+      "id": "log_1783272806316",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-05T17:33:26.312Z",
+      "dateStr": "2026-07-05",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783272838085",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-05T17:33:58.084Z",
+      "dateStr": "2026-07-05",
+      "type": "exit"
+    },
+    {
+      "id": "log_1783272843683",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-05T17:34:03.681Z",
+      "dateStr": "2026-07-05",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783275352441",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-05T18:15:52.436Z",
+      "dateStr": "2026-07-05",
+      "type": "exit"
+    },
+    {
+      "id": "log_1783275421324",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-05T18:17:01.319Z",
+      "dateStr": "2026-07-05",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783275423407",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-05T18:17:03.406Z",
+      "dateStr": "2026-07-05",
+      "type": "exit"
+    },
+    {
+      "id": "log_1783275428841",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-05T18:17:08.840Z",
+      "dateStr": "2026-07-05",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783615240778",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-09T16:40:40.756Z",
+      "dateStr": "2026-07-09",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783620599464",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-09T18:09:59.463Z",
+      "dateStr": "2026-07-09",
+      "type": "exit"
+    },
+    {
+      "id": "log_1783620624289",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-09T18:10:24.288Z",
+      "dateStr": "2026-07-09",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783620660728",
+      "studentId": "student_2",
+      "studentName": "sahal",
+      "grade": "Grade 8-B",
+      "rfidUid": "2461C901",
+      "timestamp": "2026-07-09T18:11:00.721Z",
+      "dateStr": "2026-07-09",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783620674093",
+      "studentId": "student_2",
+      "studentName": "sahal",
+      "grade": "Grade 8-B",
+      "rfidUid": "2461C901",
+      "timestamp": "2026-07-09T18:11:14.091Z",
+      "dateStr": "2026-07-09",
+      "type": "exit"
+    },
+    {
+      "id": "log_1783620855917",
+      "studentId": "student_2",
+      "studentName": "sahal",
+      "grade": "Grade 8-B",
+      "rfidUid": "2461C901",
+      "timestamp": "2026-07-09T18:14:15.917Z",
+      "dateStr": "2026-07-09",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783621988644",
+      "studentId": "student_2",
+      "studentName": "sahal",
+      "grade": "Grade 8-B",
+      "rfidUid": "2461C901",
+      "timestamp": "2026-07-09T18:33:08.641Z",
+      "dateStr": "2026-07-09",
+      "type": "exit"
+    },
+    {
+      "id": "log_1783652441790",
+      "studentId": "student_2",
+      "studentName": "sahal",
+      "grade": "Grade 8-B",
+      "rfidUid": "2461C901",
+      "timestamp": "2026-07-10T03:00:41.789Z",
+      "dateStr": "2026-07-10",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783657924226",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-10T04:32:04.203Z",
+      "dateStr": "2026-07-10",
+      "type": "entry"
+    },
+    {
+      "id": "log_1783657941447",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-10T04:32:21.442Z",
+      "dateStr": "2026-07-10",
+      "type": "exit"
+    },
+    {
+      "id": "log_1783657956122",
+      "studentId": "student_1779770480339",
+      "studentName": "anfas",
+      "grade": "10 a",
+      "rfidUid": "07 13 88 31",
+      "timestamp": "2026-07-10T04:32:36.112Z",
+      "dateStr": "2026-07-10",
+      "type": "entry"
     }
   ],
   "leaves": [
@@ -1254,6 +1678,213 @@
       "studentId": "student_1779770480339",
       "amount": 5000,
       "timestamp": "2026-06-25T18:39:08.797Z"
+    },
+    {
+      "id": "pay_1783086101137",
+      "studentId": "student_2",
+      "amount": 5000,
+      "timestamp": "2026-07-03T13:41:41.137Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif_1783086101180_0jr5l",
+      "phone": "919656108992",
+      "message": "Payment Recorded: Receipt confirmation for tuition installment of ₹5,000 received successfully for sahal.",
+      "timestamp": "2026-07-03T13:41:41.180Z"
+    },
+    {
+      "id": "notif_1783271715082_c1ysf",
+      "phone": "919656108992",
+      "message": "Attendance Alert: We are pleased to inform you that your child anfas has entered school safely today at 10:45 PM.",
+      "timestamp": "2026-07-05T17:15:15.082Z"
+    },
+    {
+      "id": "notif_1783271723086_i73de",
+      "phone": "919846229229",
+      "message": "Attendance Alert: We are pleased to inform you that your child hashif  has entered school safely today at 10:45 PM.",
+      "timestamp": "2026-07-05T17:15:23.086Z"
+    },
+    {
+      "id": "notif_1783271913159_vdu1t",
+      "phone": "919846229229",
+      "message": "Attendance Alert: We are pleased to inform you that your child hashif  has left school safely today at 10:48 PM.",
+      "timestamp": "2026-07-05T17:18:33.159Z"
+    },
+    {
+      "id": "notif_1783271916885_yyixt",
+      "phone": "919656108992",
+      "message": "Attendance Alert: We are pleased to inform you that your child anfas has left school safely today at 10:48 PM.",
+      "timestamp": "2026-07-05T17:18:36.883Z"
+    },
+    {
+      "id": "notif_1783272198846_8kddo",
+      "phone": "919656108992",
+      "message": "Attendance Alert: We are pleased to inform you that your child anfas has entered school safely today at 10:53 PM.",
+      "timestamp": "2026-07-05T17:23:18.846Z"
+    },
+    {
+      "id": "notif_1783272541891_hx62s",
+      "phone": "919846229229",
+      "message": "Attendance Alert: We are pleased to inform you that your child hashif  has entered school safely today at 10:59 PM.",
+      "timestamp": "2026-07-05T17:29:01.891Z"
+    },
+    {
+      "id": "notif_1783272689678_fl9hp",
+      "phone": "919656108992",
+      "message": "Attendance Alert: We are pleased to inform you that your child anfas has left school safely today at 11:01 PM.",
+      "timestamp": "2026-07-05T17:31:29.677Z"
+    },
+    {
+      "id": "notif_1783272806318_gi8sz",
+      "phone": "919656108992",
+      "message": "Attendance Alert: We are pleased to inform you that your child anfas has entered school safely today at 11:03 PM.",
+      "timestamp": "2026-07-05T17:33:26.317Z"
+    },
+    {
+      "id": "notif_1783272838092_8kklu",
+      "phone": "919656108992",
+      "message": "Attendance Alert: We are pleased to inform you that your child anfas has left school safely today at 11:03 PM.",
+      "timestamp": "2026-07-05T17:33:58.091Z"
+    },
+    {
+      "id": "notif_1783272843686_6sp5d",
+      "phone": "919656108992",
+      "message": "Attendance Alert: We are pleased to inform you that your child anfas has entered school safely today at 11:04 PM.",
+      "timestamp": "2026-07-05T17:34:03.685Z"
+    },
+    {
+      "id": "notif_1783275352446_eybmr",
+      "phone": "919656108992",
+      "message": "Attendance Alert: We are pleased to inform you that your child anfas has left school safely today at 11:45 PM.",
+      "timestamp": "2026-07-05T18:15:52.445Z"
+    },
+    {
+      "id": "notif_1783275421327_eu6ry",
+      "phone": "919656108992",
+      "message": "Attendance Alert: We are pleased to inform you that your child anfas has entered school safely today at 11:47 PM.",
+      "timestamp": "2026-07-05T18:17:01.327Z"
+    },
+    {
+      "id": "notif_1783275423412_ptc8l",
+      "phone": "919656108992",
+      "message": "Attendance Alert: We are pleased to inform you that your child anfas has left school safely today at 11:47 PM.",
+      "timestamp": "2026-07-05T18:17:03.409Z"
+    },
+    {
+      "id": "notif_1783275428849_2yro0",
+      "phone": "919656108992",
+      "message": "Attendance Alert: We are pleased to inform you that your child anfas has entered school safely today at 11:47 PM.",
+      "timestamp": "2026-07-05T18:17:08.848Z"
+    },
+    {
+      "id": "notif_1783615240786_7tc8v",
+      "phone": "919656108992",
+      "message": "Attendance Alert: We are pleased to inform you that your child anfas has entered school safely today at 10:10 PM.",
+      "timestamp": "2026-07-09T16:40:40.785Z"
+    },
+    {
+      "id": "notif_1783620599468_md6pt",
+      "phone": "919000000000",
+      "message": "Attendance Alert: We are pleased to inform you that your child anfas has left school safely today at 11:39 PM.",
+      "timestamp": "2026-07-09T18:09:59.468Z"
+    },
+    {
+      "id": "notif_1783620624297_vzeev",
+      "phone": "919000000000",
+      "message": "Attendance Alert: We are pleased to inform you that your child anfas has entered school safely today at 11:40 PM.",
+      "timestamp": "2026-07-09T18:10:24.291Z"
+    },
+    {
+      "id": "notif_1783620660730_30yjj",
+      "phone": "919656108992",
+      "message": "Attendance Alert: We are pleased to inform you that your child sahal has entered school safely today at 11:41 PM.",
+      "timestamp": "2026-07-09T18:11:00.730Z"
+    },
+    {
+      "id": "notif_1783620674095_t7kcq",
+      "phone": "919656108992",
+      "message": "Attendance Alert: We are pleased to inform you that your child sahal has left school safely today at 11:41 PM.",
+      "timestamp": "2026-07-09T18:11:14.094Z"
+    },
+    {
+      "id": "notif_1783620855919_gogch",
+      "phone": "919656108992",
+      "message": "Attendance Alert: We are pleased to inform you that your child sahal has entered school safely today at 11:44 PM.",
+      "timestamp": "2026-07-09T18:14:15.919Z"
+    },
+    {
+      "id": "notif_1783621988650_dcwsg",
+      "phone": "919656108992",
+      "message": "Attendance Alert: We are pleased to inform you that your child sahal has left school safely today at 12:03 AM.",
+      "timestamp": "2026-07-09T18:33:08.650Z"
+    },
+    {
+      "id": "notif_1783652441799_xfk1b",
+      "phone": "919656108992",
+      "message": "Attendance Alert: We are pleased to inform you that your child sahal has entered school safely today at 8:30 AM.",
+      "timestamp": "2026-07-10T03:00:41.798Z"
+    },
+    {
+      "id": "notif_1783657924229_y08na",
+      "phone": "919000000000",
+      "message": "Attendance Alert: We are pleased to inform you that your child anfas has entered school safely today at 10:02 AM.",
+      "timestamp": "2026-07-10T04:32:04.228Z"
+    },
+    {
+      "id": "notif_1783657941450_grk06",
+      "phone": "919000000000",
+      "message": "Attendance Alert: We are pleased to inform you that your child anfas has left school safely today at 10:02 AM.",
+      "timestamp": "2026-07-10T04:32:21.449Z"
+    },
+    {
+      "id": "notif_1783657956130_gwfor",
+      "phone": "919000000000",
+      "message": "Attendance Alert: We are pleased to inform you that your child anfas has entered school safely today at 10:02 AM.",
+      "timestamp": "2026-07-10T04:32:36.129Z"
+    }
+  ],
+  "schools": [
+    {
+      "id": "school_101",
+      "name": "St. Mary's Public School",
+      "domain": "stmarys.mykard.com",
+      "branding": {
+        "logoUrl": "/school_logo.png",
+        "primaryColor": "#4D69D6",
+        "accentColor": "#6366F1",
+        "backgroundUrl": "/background.png"
+      },
+      "createdAt": "2026-07-11T15:20:17.129Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "+919656108992",
+      "role": "parent",
+      "schoolId": "school_101",
+      "name": "Emily Jenkins",
+      "passwordHash": "16a5ca5cd6a133fafd0e5c697c21de258a5b09af4ce4b1b956ef4572afbeca24",
+      "setupRequired": false,
+      "createdAt": "2026-07-11T17:38:11.079Z"
+    },
+    {
+      "id": "teacher_001",
+      "role": "teacher",
+      "schoolId": "school_101",
+      "name": "Anjali Nair",
+      "passwordHash": "",
+      "setupRequired": true,
+      "createdAt": "2026-07-11T17:38:11.079Z"
+    },
+    {
+      "id": "admin_001",
+      "role": "principal",
+      "schoolId": "school_101",
+      "name": "Principal Principal",
+      "passwordHash": "",
+      "setupRequired": true,
+      "createdAt": "2026-07-11T17:38:11.079Z"
     }
   ]
 }
