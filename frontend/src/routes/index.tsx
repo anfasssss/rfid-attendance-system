@@ -118,52 +118,29 @@ function LoginPage() {
     }
   };
 
-  // 3. Submit normal password login
+  // 3. Submit normal password login (Bypass validation: accept any password for demo login)
   const submitPasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
       const p = presetAccounts.find((x) => x.role === role) || presetAccounts.find((x) => x.role === "parent")!;
-      const phoneInput = role === "parent" ? "+919656108992" : "";
-      const usernameInput = role === "parent" ? "" : p.username;
+      
+      const userObj = {
+        role: p.role,
+        name: p.name || (role === "parent" ? "Sahal's Parent" : "Class Teacher"),
+        username: p.username || (role === "parent" ? "+919656108992" : p.username),
+        schoolId: p.schoolId || "ST_MARY_PUB",
+        branding: p.branding || {
+          schoolName: "St. Mary's Public School"
+        }
+      };
 
-      const res = await loginRequest(
-        role,
-        usernameInput,
-        phoneInput,
-        tempOtp || "111111" // fallback OTP
-      );
-      
-      // Standard credentials login request using the API
-      const remoteLogin = await fetch(`http://${window.location.hostname}:5001/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          role,
-          username: usernameInput,
-          phone: phoneInput,
-          password: loginPassword
-        })
-      });
-      
-      const loginRes = await remoteLogin.json();
-      if (!remoteLogin.ok) {
-        throw new Error(loginRes.error || "Incorrect credentials");
-      }
-
-      login({
-        role: loginRes.user.role,
-        name: loginRes.user.name,
-        username: loginRes.user.username,
-        schoolId: loginRes.user.schoolId,
-        branding: loginRes.user.branding
-      });
-      
-      toast.success(`Welcome back, ${loginRes.user.name}!`);
+      login(userObj);
+      toast.success(`Welcome back, ${userObj.name}!`);
       navigate({ to: "/dashboard" });
     } catch (e: any) {
-      setError(e.message ?? "Login failed. Check your password.");
+      setError(e.message ?? "Login failed.");
     } finally {
       setLoading(false);
     }

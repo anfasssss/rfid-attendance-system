@@ -83,7 +83,7 @@ if (PROVIDER === 'twilio') {
 }
 
 const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET || 'brahmagupta-super-secret-key-123456';
+const JWT_SECRET = process.env.JWT_SECRET || 'mykard-super-secret-key-123456';
 
 // Middleware to verify JWT tokens and secure API endpoints
 function authenticateToken(req, res, next) {
@@ -1005,7 +1005,7 @@ async function handleTeacherChatbotLogic(teacher, messageText) {
   // Global reset back to Menu
   if (text === 'hi' || text === 'hello' || text === 'menu') {
     session.step = 'menu';
-    let menuMsg = `🏫 *Brahmagupta Academy - Teacher Portal* 👩‍🏫\n`;
+    let menuMsg = `🏫 *mykard Academy - Teacher Portal* 👩‍🏫\n`;
     menuMsg += `Hello Teacher *${teacher.name}* (${teacher.grade}).\n\n`;
     menuMsg += `Please choose an option:\n`;
     menuMsg += `1️⃣ *Leaves Today* - Today's leave reports\n`;
@@ -1209,7 +1209,7 @@ async function handleIncomingChatbotLogic(senderPhoneDigits, messageText) {
 
   // Option 2: School Contact Details
   if (text === '2' || text === 'school') {
-    return `🏫 *School Contact Details* 🏫\n\n📌 *School:* Brahmagupta Academy\n📍 *Address:* 123 Education Drive, Tech City\n📞 *Office Phone:* +1 (555) 019-2834\n📧 *Email:* info@abacademy.edu\n🕒 *Hours:* 8:00 AM - 3:00 PM\n\n_Reply with *Menu* to return._`;
+    return `🏫 *School Contact Details* 🏫\n\n📌 *School:* mykard Academy\n📍 *Address:* 123 Education Drive, Tech City\n📞 *Office Phone:* +1 (555) 019-2834\n📧 *Email:* info@abacademy.edu\n🕒 *Hours:* 8:00 AM - 3:00 PM\n\n_Reply with *Menu* to return._`;
   }
 
   // Option 3: Registered Child & RFID Details
@@ -1393,7 +1393,7 @@ async function sendFeesReminderNotification(student, remaining, dueDate) {
   const normalizedPhone = normalizePhone(student.parentPhone);
   if (!normalizedPhone) return false;
 
-  const alertMsg = `🔔 *Fee Reminder - Brahmagupta Academy* 🏫\n\nHello Mr./Mrs. ${student.parentName || 'Parent'},\nThis is a friendly reminder that the school fees for your child *${student.name}* (${student.grade}) has a remaining balance of *₹${remaining.toLocaleString()}*.\n\n📅 *Due Date:* ${dueDate}\n\nPlease settle the dues at your earliest convenience. Thank you!`;
+  const alertMsg = `🔔 *Fee Reminder - mykard Academy* 🏫\n\nHello Mr./Mrs. ${student.parentName || 'Parent'},\nThis is a friendly reminder that the school fees for your child *${student.name}* (${student.grade}) has a remaining balance of *₹${remaining.toLocaleString()}*.\n\n📅 *Due Date:* ${dueDate}\n\nPlease settle the dues at your earliest convenience. Thank you!`;
 
   if (PROVIDER === 'twilio' && twilioClient) {
     try {

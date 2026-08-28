@@ -158,6 +158,8 @@ function ThemeContainer({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+  const pathname = router.state.location.pathname;
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
@@ -176,7 +178,9 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ThemeContainer>
-          <Outlet />
+          <div key={pathname} className="route-transition w-full flex flex-col flex-1">
+            <Outlet />
+          </div>
           <Toaster position="top-right" closeButton richColors />
         </ThemeContainer>
       </AuthProvider>

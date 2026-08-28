@@ -1608,6 +1608,16 @@
       "timestamp": "2026-07-10T04:32:36.112Z",
       "dateStr": "2026-07-10",
       "type": "entry"
+    },
+    {
+      "id": "log_1785951465859",
+      "studentId": "unregistered",
+      "studentName": "Unregistered Card",
+      "grade": "Unassigned",
+      "rfidUid": "33 A9 61 35",
+      "timestamp": "2026-08-05T17:37:45.855Z",
+      "dateStr": "2026-08-05",
+      "type": "entry"
     }
   ],
   "leaves": [

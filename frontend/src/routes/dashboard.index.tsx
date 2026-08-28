@@ -92,7 +92,7 @@ function Overview() {
 
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-        <div className="bg-white border border-[#4D69D6]/20 rounded-[32px] p-6 max-w-sm w-full shadow-[0_12px_32px_rgba(77,105,214,0.12)] relative space-y-5 text-slate-800 animate-in zoom-in-95 duration-200">
+        <div className="bg-white border border-[#4D69D6]/20 rounded-[32px] p-6 max-w-sm w-full max-h-[90vh] overflow-y-auto shadow-[0_12px_32px_rgba(77,105,214,0.12)] relative space-y-5 text-slate-800 animate-in zoom-in-95 duration-200">
           
           {/* Close X */}
           <button 
@@ -234,7 +234,7 @@ function Overview() {
     if (!showContactModal) return null;
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-        <div className="bg-white border border-[#4D69D6]/20 rounded-[32px] p-6 max-w-sm w-full shadow-[0_12px_32px_rgba(77,105,214,0.12)] relative space-y-6 text-slate-800 animate-in zoom-in-95 duration-200">
+        <div className="bg-white border border-[#4D69D6]/20 rounded-[32px] p-6 max-w-sm w-full max-h-[90vh] overflow-y-auto shadow-[0_12px_32px_rgba(77,105,214,0.12)] relative space-y-6 text-slate-800 animate-in zoom-in-95 duration-200">
           
           {/* Close button X */}
           <button 
@@ -314,7 +314,7 @@ function Overview() {
     if (!showDueModal) return null;
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-        <div className="bg-white border border-[#4D69D6]/20 rounded-[32px] p-6 max-w-sm w-full shadow-[0_12px_32px_rgba(77,105,214,0.12)] relative space-y-5 text-slate-800 animate-in zoom-in-95 duration-200">
+        <div className="bg-white border border-[#4D69D6]/20 rounded-[32px] p-6 max-w-sm w-full max-h-[90vh] overflow-y-auto shadow-[0_12px_32px_rgba(77,105,214,0.12)] relative space-y-5 text-slate-800 animate-in zoom-in-95 duration-200">
           
           {/* Close button X */}
           <button 
@@ -459,116 +459,132 @@ function Overview() {
 
   if (!session) return null;
 
-  // --- PRINCIPAL VIEW ---
   if (session.role === "principal") {
     const checkedIn = logs.filter((l) => l.status === "check-in" || l.status === "late").length;
     const alerts = logs.filter((l) => l.status === "unregistered").length + leaves.filter((l) => l.status === "pending").length;
     const checkedInRate = Math.round((checkedIn / (students.length || 1)) * 100);
 
     return (
-      <div className="flex flex-col min-h-screen bg-[#FFCC00] font-sans pb-32">
-        <div className="bg-[#4F54C4] text-white p-8 pb-10 rounded-b-[40px] border-b-[3px] border-black relative shrink-0">
-          <div className="absolute top-8 right-8 font-serif text-[24px] font-extrabold select-none tracking-tight">
-            mykard
-          </div>
-          <button 
-            onClick={handleLogout}
-            className="absolute top-8 left-8 text-white/80 hover:text-white transition-colors cursor-pointer"
-            title="Sign Out"
-          >
-            <span className="material-symbols-outlined text-[24px]">logout</span>
-          </button>
-          <div className="mt-14 space-y-2">
-            <h1 className="text-[38px] font-bold tracking-tight leading-none">Halo, Admin</h1>
-            <p className="text-white/70 text-xs font-semibold uppercase tracking-wider">
-              Principal central dashboard
+      <div className="space-y-8 pb-12 text-slate-800 font-sans">
+        <section className="space-y-4">
+          <div>
+            <h1 className="font-serif text-[28px] sm:text-[42px] leading-tight text-slate-900 font-extrabold">Hi, Admin</h1>
+            <p className="text-sm sm:text-base text-slate-500 font-light leading-relaxed">
+              Oversight and configuration control center of the campus connected RFID networks.
             </p>
           </div>
-          <div className="flex gap-4 mt-10">
-            <button 
-              type="button"
-              onClick={() => setShowCalendarModal(true)}
-              className="flex-1 bg-[#F8C5D2] text-black p-4 rounded-2xl border-[3px] border-black shadow-[3px_3px_0_0_#000] text-center hover:brightness-95 transition active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0_0_#000] cursor-pointer"
-            >
-              <span className="text-[10px] font-extrabold uppercase tracking-wider block opacity-70">
-                Attendance
-              </span>
-              <span className="text-[28px] font-black leading-none mt-1.5 block">
-                {checkedInRate}%
-              </span>
-            </button>
-            <div className="flex-grow bg-[#9ADBFB] text-black p-4 rounded-2xl border-[3px] border-black shadow-[3px_3px_0_0_#000] text-center">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider block opacity-70">
-                Alerts
-              </span>
-              <span className="text-[28px] font-black leading-none mt-1.5 block">
-                {alerts}
+          <div className="flex gap-2">
+            <span className="bg-[#0058be]/10 text-[#0058be] px-3.5 py-1.5 rounded-full text-[10px] uppercase tracking-wider font-extrabold flex items-center gap-1.5 border border-[#0058be]/5">
+              <span className="material-symbols-outlined !text-[16px]">calendar_today</span>
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+            </span>
+            <span className="bg-emerald-50 text-emerald-600 px-3.5 py-1.5 rounded-full text-[10px] uppercase tracking-wider font-extrabold flex items-center gap-1.5 border border-emerald-100">
+              <span className="material-symbols-outlined !text-[16px] animate-pulse">sensors</span>
+              RFID Network Live
+            </span>
+          </div>
+        </section>
+
+        {/* Quick Statistics Stats Cards */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <button 
+            onClick={() => setShowCalendarModal(true)}
+            className="premium-card p-6 rounded-3xl bg-white shadow-xs flex items-center gap-5 hover:bg-gray-50 transition-all active:scale-95 text-left group cursor-pointer"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-[#0058be]/5 flex items-center justify-center border border-slate-100 group-hover:bg-[#0058be]/10 transition-colors">
+              <span className="material-symbols-outlined text-[#0058be] text-2xl">how_to_reg</span>
+            </div>
+            <div>
+              <span className="font-serif text-[18px] font-bold text-slate-900 block tracking-tight">Attendance Rate</span>
+              <span className="text-[22px] font-black text-[#0058be] block mt-1">{checkedInRate}%</span>
+            </div>
+          </button>
+          <Link to="/dashboard/leaves" className="premium-card p-6 rounded-3xl bg-white shadow-xs flex items-center gap-5 hover:bg-gray-50 transition-all active:scale-95 text-left group">
+            <div className="w-14 h-14 rounded-2xl bg-rose-500/5 flex items-center justify-center border border-slate-100 group-hover:bg-rose-500/10 transition-colors">
+              <span className="material-symbols-outlined text-rose-600 text-2xl">event_busy</span>
+            </div>
+            <div>
+              <span className="font-serif text-[18px] font-bold text-slate-900 block tracking-tight">Active Alerts & Leaves</span>
+              <span className="text-[22px] font-black text-rose-600 block mt-1">{alerts} Pending</span>
+            </div>
+          </Link>
+          <div className="premium-card p-6 rounded-3xl bg-white shadow-xs flex items-center gap-5 hover:bg-gray-50 transition-all text-left group">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/5 flex items-center justify-center border border-slate-100 group-hover:bg-emerald-500/10 transition-colors">
+              <span className="material-symbols-outlined text-emerald-600 text-2xl">router</span>
+            </div>
+            <div>
+              <span className="font-serif text-[18px] font-bold text-slate-900 block tracking-tight">Gateway Hardware</span>
+              <span className="text-[14px] font-bold text-emerald-650 block mt-1 flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" /> Online & Stable
               </span>
             </div>
           </div>
-        </div>
+        </section>
 
-        <main className="flex-grow p-6 space-y-6">
-          <div className="bg-white border-[3px] border-black rounded-[24px] p-6 shadow-[5px_5px_0_0_#000] space-y-4">
-            <h3 className="font-extrabold text-[15px] uppercase tracking-wider text-slate-800 border-b-[2px] border-slate-100 pb-2">
-              Recent Campus Activity
-            </h3>
-            <div className="space-y-3">
-              {logs.slice(0, 3).map((log, idx) => (
-                <div key={idx} className="flex justify-between items-center text-xs border-b border-slate-50 pb-2 last:border-none last:pb-0">
-                  <div>
-                    <p className="font-bold text-slate-800">{log.studentName}</p>
-                    <p className="text-slate-400 text-[10px]">{log.gate || "RFID Terminal"}</p>
+        {/* Detailed Grid (Activity Feed and Requests) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <section className="lg:col-span-2 premium-card p-6 rounded-3xl bg-white shadow-xs">
+            <div className="mb-6 flex justify-between items-center">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-slate-900 tracking-tight">Recent Campus Activity</h3>
+                <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mt-1">Live scan signals</p>
+              </div>
+              <Link to="/dashboard/attendance" className="text-[#0058be] font-bold text-xs hover:underline">View All logs</Link>
+            </div>
+            <div className="space-y-4">
+              {logs.slice(0, 5).map((log, idx) => (
+                <div key={idx} className="flex justify-between items-center text-sm border-b border-slate-50 pb-3 last:border-none last:pb-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center font-bold text-[#0058be] border border-slate-100">
+                      {log.studentName.split(" ").map(n => n[0]).join("")}
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-800">{log.studentName}</p>
+                      <p className="text-slate-400 text-[11px] font-medium">{log.gate || "RFID Terminal"} · Grade {log.grade}</p>
+                    </div>
                   </div>
-                  <span className={`px-2 py-0.5 rounded-md font-bold uppercase text-[9px] ${
-                    log.status === "late" ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"
-                  }`}>
-                    {log.status}
-                  </span>
+                  <div className="text-right">
+                    <span className={`px-2.5 py-0.5 rounded-full font-bold uppercase text-[9px] ${
+                      log.status === "late" ? "bg-amber-50 text-amber-800" : "bg-emerald-50 text-emerald-800"
+                    }`}>
+                      {log.status}
+                    </span>
+                    <p className="text-[10px] text-slate-400 mt-1 font-semibold">
+                      {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
                 </div>
               ))}
               {logs.length === 0 && (
                 <p className="text-center text-slate-400 py-4 text-xs">No scan signals received yet.</p>
               )}
             </div>
-          </div>
+          </section>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white border-[3px] border-black rounded-2xl p-4 shadow-[3px_3px_0_0_#000] text-center">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
-                Wi-Fi
-              </span>
-              <span className="text-sm font-extrabold text-green-600 block mt-1">
-                Stable
-              </span>
+          <section className="lg:col-span-1 premium-card p-6 rounded-3xl bg-white shadow-xs">
+            <div className="mb-6 flex justify-between items-center">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-slate-900 tracking-tight">Hardware Status</h3>
+                <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mt-1">IoT Network Hubs</p>
+              </div>
             </div>
-            <div className="bg-white border-[3px] border-black rounded-2xl p-4 shadow-[3px_3px_0_0_#000] text-center">
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
-                Gate Lock
-              </span>
-              <span className="text-sm font-extrabold text-green-600 block mt-1">
-                Secured
-              </span>
+            <div className="space-y-4">
+              <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100/50 flex justify-between items-center">
+                <span className="text-sm font-bold text-slate-700">School Wi-Fi</span>
+                <span className="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full">Stable</span>
+              </div>
+              <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100/50 flex justify-between items-center">
+                <span className="text-sm font-bold text-slate-700">Gate RFID Scanner</span>
+                <span className="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full">Connected</span>
+              </div>
+              <div className="bg-gray-50/50 p-4 rounded-2xl border border-gray-100/50 flex justify-between items-center">
+                <span className="text-sm font-bold text-slate-700">Main Gate Lock</span>
+                <span className="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full">Secured</span>
+              </div>
             </div>
-          </div>
-        </main>
-
-        <nav className="fixed bottom-0 left-0 w-full z-50 transition-all duration-300">
-          <div className="max-w-md mx-auto px-4 pb-6">
-            <div className="bg-white rounded-2xl border-[3px] border-black shadow-[4px_4px_0_0_#000] px-4 py-3 flex justify-center items-center gap-12">
-              <Link className="flex flex-col items-center justify-center gap-1 px-4 py-2 text-[#4F54C4] font-extrabold" to="/dashboard">
-                <span className="material-symbols-outlined scale-110 font-bold">home</span>
-                <span className="text-[10px] font-extrabold uppercase tracking-wide">Home</span>
-              </Link>
-              <Link className="flex flex-col items-center justify-center gap-1 px-4 py-2 text-slate-400 hover:text-slate-600 transition-colors" to="/dashboard/attendance">
-                <span className="material-symbols-outlined scale-110">calendar_month</span>
-                <span className="text-[10px] font-extrabold uppercase tracking-wide">Attendance</span>
-              </Link>
-            </div>
-          </div>
-        </nav>
+          </section>
+        </div>
         {renderCalendarModal()}
-        {renderContactModal()}
       </div>
     );
   }
@@ -736,11 +752,10 @@ function Overview() {
   if (session.role === "parent") {
     const parentFirstName = session.name.split(" ")[0];
     const child = kids[0];
-
     return (
-      <div className="min-h-screen w-screen text-slate-800 flex justify-center relative font-sans bg-cover bg-center pb-28" style={{ backgroundImage: `url(${(typeof window !== "undefined" && (window as any).Capacitor) ? "background.png" : "/background.png"})` }}>
-        
-        <div className="w-full max-w-md flex flex-col relative z-10">
+      <div className="fixed inset-0 w-full h-full text-slate-800 font-sans overflow-hidden bg-cover bg-center" style={{ backgroundImage: `url(${(typeof window !== "undefined" && (window as any).Capacitor) ? "background.png" : "/background.png"})` }}>
+        <div className="w-full h-full overflow-y-auto overflow-x-hidden flex justify-center">
+          <div className="w-full max-w-md flex flex-col relative z-10 px-4 pt-4 pb-32">
           
           {/* Top Header section */}
           <header className="px-6 pt-6 pb-2 flex justify-between items-start relative">
@@ -872,8 +887,12 @@ function Overview() {
                 {/* Student Photo with Ring Accent */}
                 <div className="flex justify-center pt-1">
                   <div className="w-28 h-28 rounded-full p-[3px] bg-gradient-to-tr from-[#3B82F6] to-[#7C3AED] shadow-[0_6px_20px_rgba(59,130,246,0.15)] flex items-center justify-center">
-                    <div className="w-full h-full rounded-full bg-[#E8F0FE] flex items-center justify-center overflow-hidden">
-                      <span className="material-symbols-outlined text-[64px] text-[#4F54C4] select-none">person</span>
+                    <div className="w-full h-full rounded-full border-[3px] border-white overflow-hidden bg-[#E8F0FE] flex items-center justify-center">
+                      <img 
+                        src={(typeof window !== "undefined" && (window as any).Capacitor) ? "avatar.jpg" : "/avatar.jpg"} 
+                        alt="Student Photo" 
+                        className="w-full h-full object-cover animate-fade-in"
+                      />
                     </div>
                   </div>
                 </div>
@@ -985,6 +1004,7 @@ function Overview() {
               </div>
           </main>
         </div>
+      </div>
 
         {/* Bottom Navigation (Exact Mockup Alignment) */}
         <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-45 bg-white border-t border-slate-100 shadow-[0_-8px_30px_rgba(240,244,255,0.6)] rounded-t-[28px] overflow-hidden">

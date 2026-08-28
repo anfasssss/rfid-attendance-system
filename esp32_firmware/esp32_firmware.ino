@@ -71,9 +71,9 @@
 // --- CONFIGURATION ---
 const char* ssid = "Hipower:Broadband";             // Replace with your Wi-Fi SSID
 const char* password = "abcd1234";     // Replace with your Wi-Fi Password
-const char* serverHost = "192.168.30.10";
+const char* serverHost = "192.168.30.14";
 const int serverPort = 5001;
-String serverUrl = "http://192.168.30.10:5001/api/scan";
+String serverUrl = "http://192.168.30.14:5001/api/scan";
 
 // --- HARDWARE PIN OUTS ---
 #define RST_PIN     14  // Relocated to GPIO 14 to allow free I2C SCL pin on GPIO 22
@@ -174,7 +174,7 @@ void drawDisplayMessage(const String& title, const String& line1, const String& 
 
 // Display the idle standby screen
 void showStandbyScreen() {
-  drawDisplayMessage("BRAHMAGUPTA ACAD.", "SYSTEM ACTIVE", "Present RFID Card", "Ready for scans");
+  drawDisplayMessage("MYKARD CAMPUS", "SYSTEM ACTIVE", "Present RFID Card", "Ready for scans");
   digitalWrite(GREEN_LED_PIN, LOW);
   digitalWrite(RED_LED_PIN, LOW);
 }
@@ -221,7 +221,7 @@ void autoDiscoverServer() {
     }
 
     WiFiClient client;
-    client.setTimeout(40); // 40ms timeout for fast scan
+    client.setTimeout(150); // 150ms timeout for reliable local Wi-Fi scan
     if (client.connect(targetIP, serverPort)) {
       Serial.printf("🎯 [Discovery] Found active listener at %s:%d! Verifying...\n", targetIP.toString().c_str(), serverPort);
       
@@ -288,7 +288,7 @@ void setup() {
   Serial.println("\n--- RFID Attendance System Initializing ---");
   Serial.print("🔗 Configured Server URL: ");
   Serial.println(serverUrl);
-  drawDisplayMessage("BRAHMAGUPTA ACAD.", "SYSTEM BOOTING", "Initializing...", "V1.2.0-IoT", 1500);
+  drawDisplayMessage("MYKARD CAMPUS", "SYSTEM BOOTING", "Initializing...", "V1.2.0-IoT", 1500);
 
   // 1. Connect to Wi-Fi
   WiFi.disconnect(true);
@@ -425,7 +425,7 @@ void loop() {
     HTTPClient http;
     http.begin(serverUrl);
     http.addHeader("Content-Type", "application/json");
-    http.addHeader("X-Device-Token", "brahmagupta_security_key_2026");
+    http.addHeader("X-Device-Token", "mykard_security_key_2026");
 
     // Prepare JSON payload
     String requestPayload = "{\"rfidUid\":\"" + cardUid + "\"}";

@@ -84,8 +84,40 @@ function initializeMockDb() {
   }
 }
 
-// Unconditionally initialize local JSON database mode
-initializeMockDb();
+// Load environment variables
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+
+const serviceAccountPath = path.join(__dirname, 'serviceAccountKey.json');
+
+if (fs.existsSync(serviceAccountPath)) {
+  try {
+    admin.initializeApp({
+      credential: admin.credential.cert(require(serviceAccountPath))
+    });
+    db = admin.firestore();
+    isMock = false;
+    console.log('🔥  [Database Service] Running in LIVE FIREBASE mode using serviceAccountKey.json.');
+  } catch (err) {
+    console.error('❌ Failed to initialize Firebase with serviceAccountKey.json:', err.message);
+    initializeMockDb();
+  }
+} else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  try {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    db = admin.firestore();
+    isMock = false;
+    console.log('🔥  [Database Service] Running in LIVE FIREBASE mode using FIREBASE_SERVICE_ACCOUNT env var.');
+  } catch (err) {
+    console.error('❌ Failed to initialize Firebase with FIREBASE_SERVICE_ACCOUNT:', err.message);
+    initializeMockDb();
+  }
+} else {
+  // Fallback to local mock JSON database
+  initializeMockDb();
+}
 
 // Read local mock DB helper
 function readMockDb() {

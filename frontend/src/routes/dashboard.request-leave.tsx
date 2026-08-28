@@ -70,8 +70,8 @@ function RequestLeavePage() {
   };
 
   return (
-    <div className="min-h-screen w-screen text-slate-800 flex justify-center relative font-sans bg-cover bg-center pb-28" style={{ backgroundImage: `url(${(typeof window !== "undefined" && (window as any).Capacitor) ? "background.png" : "/background.png"})` }}>
-      <div className="w-full max-w-md flex flex-col relative z-10">
+    <div className="fixed inset-0 w-full h-full text-slate-800 flex justify-center relative font-sans bg-cover bg-center overflow-y-auto pb-28 px-4" style={{ backgroundImage: `url(${(typeof window !== "undefined" && (window as any).Capacitor) ? "background.png" : "/background.png"})` }}>
+      <div className="w-full max-w-md flex flex-col relative z-10 pb-16">
       <style>{`
         .premium-card {
           background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);

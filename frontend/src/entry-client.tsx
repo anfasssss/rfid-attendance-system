@@ -8,7 +8,9 @@ const isSPA = typeof window !== "undefined" && (
   (window as any).Capacitor ||
   window.location.protocol === "file:" ||
   window.location.pathname.includes("index.html") ||
-  (window.location.hostname === "localhost" && !window.location.port)
+  (window.location.hostname === "localhost" && !window.location.port) ||
+  !container?.innerHTML ||
+  container.innerHTML.trim().length === 0
 );
 
 if (container && isSPA) {

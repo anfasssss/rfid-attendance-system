@@ -19,7 +19,7 @@ import {
 const isCapacitor = typeof window !== "undefined" && (window as any).Capacitor;
 
 export const BASE_URL = isCapacitor
-  ? "http://192.168.30.10:5001/api"
+  ? "http://192.168.30.14:5001/api"
   : typeof window !== "undefined" && (window as any).__BRAHMAGUPTA_API__
     ? (window as any).__BRAHMAGUPTA_API__
     : import.meta.env.PROD
